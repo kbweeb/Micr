@@ -1,0 +1,73 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "Micr.UI/1.0.0": {
+        "dependencies": {
+          "Micr.BusinessLogic": "1.0.0",
+          "Micr.Domain": "1.0.0"
+        },
+        "runtime": {
+          "Micr.UI.dll": {}
+        }
+      },
+      "Micr.BusinessLogic/1.0.0": {
+        "dependencies": {
+          "Micr.DataAccess": "1.0.0",
+          "Micr.Domain": "1.0.0"
+        },
+        "runtime": {
+          "Micr.BusinessLogic.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Micr.DataAccess/1.0.0": {
+        "dependencies": {
+          "Micr.Domain": "1.0.0"
+        },
+        "runtime": {
+          "Micr.DataAccess.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Micr.Domain/1.0.0": {
+        "runtime": {
+          "Micr.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Micr.UI/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Micr.BusinessLogic/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Micr.DataAccess/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Micr.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

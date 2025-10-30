@@ -1,0 +1,3 @@
+taskkill /IM devenv.exe /F
+rd /s /q .vs
+echo .vs/ > .gitignore

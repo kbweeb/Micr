@@ -1,0 +1,12 @@
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\bin\Debug\net9.0\Micr.Domain.deps.json
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\bin\Debug\net9.0\Micr.Domain.dll
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\bin\Debug\net9.0\Micr.Domain.pdb
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\Micr.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\Micr.Domain.AssemblyInfoInputs.cache
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\Micr.Domain.AssemblyInfo.cs
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\Micr.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\Micr.Domain.sourcelink.json
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\Micr.Domain.dll
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\refint\Micr.Domain.dll
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\Micr.Domain.pdb
+C:\Users\ednaa\Desktop\New folder\Micr\Micr.Domain\obj\Debug\net9.0\ref\Micr.Domain.dll
