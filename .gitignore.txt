@@ -1,3 +1,7 @@
-taskkill /IM devenv.exe /F
-rd /s /q .vs
-echo .vs/ > .gitignore
+# Visual Studio files
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.vscode/
