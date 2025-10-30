@@ -1,0 +1,68 @@
+@model IEnumerable<MicrDbChequeProcessingSystem.Models.Currency>
+
+@{
+    var currencies = Model?.ToList() ?? new List<MicrDbChequeProcessingSystem.Models.Currency>();
+    ViewData["Title"] = "Currencies";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">Currency Directory</h5>
+            <small class="text-muted">@currencies.Count currencies available.</small>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="currencyTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Code</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Symbol</th>
+                        <th scope="col">Active</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Created By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (currencies.Any())
+                    {
+                        foreach (var currency in currencies)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@currency.CurrencyCode</td>
+                                <td>@currency.CurrencyName</td>
+                                <td>@currency.Symbol</td>
+                                <td>
+                                    @if (currency.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td>@currency.CreatedDate.ToString("dd MMM yyyy")</td>
+                                <td>@currency.CreatedByUser?.Fullname</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/duralux/vendors/js/dataTables.min.js" asp-append-version="true"></script>
+    <script src="~/duralux/vendors/js/dataTables.bs5.min.js" asp-append-version="true"></script>
+    <script>
+        $(function () {
+            $('#currencyTable').DataTable({
+                responsive: true
+            });
+        });
+    </script>
+}

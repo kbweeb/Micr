@@ -1,0 +1,107 @@
+/* Modal Backdrop and Blur Fix */
+
+/* Remove blur effect from body when modal is open */
+body.modal-open {
+    overflow: hidden;
+    /* Remove any existing blur effects */
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Ensure modal backdrop doesn't apply blur to body content */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Fix for any existing blur classes */
+.blur-background,
+.modal-blur,
+.backdrop-blur {
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure modal content is clear and sharp */
+.modal-dialog,
+.modal-content {
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Remove blur from navigation and other elements when modal is open */
+body.modal-open .nxl-navigation,
+body.modal-open .nxl-header,
+body.modal-open .nxl-container,
+body.modal-open .main-content {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Ensure tooltips and popovers work correctly with modals */
+.tooltip,
+.popover {
+    z-index: 1070;
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Fix for SweetAlert2 modals if used */
+.swal2-container {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.swal2-modal {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Ensure dropdown menus work correctly with modals */
+.dropdown-menu {
+    z-index: 1055;
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Fix for any custom blur classes that might be added by JavaScript */
+.no-blur,
+.modal-no-blur {
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure proper stacking context */
+.modal {
+    z-index: 1050;
+}
+
+.modal-backdrop {
+    z-index: 1040;
+}
+
+/* Fix for Offcanvas elements */
+.offcanvas {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+body.offcanvas-open {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Additional fixes for theme-specific blur issues */
+.theme-blur-fix {
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
