@@ -20,11 +20,14 @@
   <ItemGroup>
     <Compile Remove="Tests\**\*.cs" />
     <Compile Remove="ProjectMicrCPO\**\*.cs" />
+    <Compile Remove="Models\**\*.cs" />
+    <Compile Remove="Data\MicrDbContext.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
   </ItemGroup>
 
 </Project>
