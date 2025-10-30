@@ -1,0 +1,71 @@
+@model MicrDbChequeProcessingSystem.ViewModels.ReportIssueViewModel
+@{
+    ViewData["Title"] = "Report an Issue";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Log an Incident</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Provide as much detail as possible. The operations desk will acknowledge within 30 minutes.</p>
+
+                @if (TempData["ReportConfirmation"] is string confirmation)
+                {
+                    <div class="alert alert-success" role="alert">@confirmation</div>
+                }
+
+                <form asp-action="ReportIssue" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="ReporterName" class="form-label"></label>
+                            <input asp-for="ReporterName" class="form-control" />
+                            <span asp-validation-for="ReporterName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ReporterEmail" class="form-label"></label>
+                            <input asp-for="ReporterEmail" class="form-control" />
+                            <span asp-validation-for="ReporterEmail" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Module" class="form-label"></label>
+                            <select asp-for="Module" class="form-select">
+                                <option value="">-- Select module --</option>
+                                <option>Dashboard</option>
+                                <option>Banks</option>
+                                <option>Bank Branches</option>
+                                <option>Customer Profiles</option>
+                                <option>Account Types</option>
+                                <option>Cheque Books</option>
+                                <option>Operations Reports</option>
+                            </select>
+                            <span asp-validation-for="Module" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ReferenceId" class="form-label"></label>
+                            <input asp-for="ReferenceId" class="form-control" placeholder="Ticket, batch or transaction #" />
+                            <span asp-validation-for="ReferenceId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a asp-action="Help" class="btn btn-outline-secondary">Go to help center</a>
+                        <button type="submit" class="btn btn-danger">Submit report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

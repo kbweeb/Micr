@@ -1,0 +1,233 @@
+@{
+    ViewData["Title"] = "System Status";
+}
+
+<div class="row g-4" id="system-status-root">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="mb-1">Live telemetry</h5>
+                    <p class="text-muted mb-0 small">Snapshot generated <span id="status-generated">—</span></p>
+                </div>
+                <div class="d-flex gap-3" id="status-metrics">
+                    <div class="text-center">
+                        <h4 class="mb-0" data-metric="Banks">—</h4>
+                        <span class="text-muted small">Banks</span>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="mb-0" data-metric="Branches">—</h4>
+                        <span class="text-muted small">Branches</span>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="mb-0" data-metric="Customers">—</h4>
+                        <span class="text-muted small">Customers</span>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="mb-0" data-metric="Regions">—</h4>
+                        <span class="text-muted small">Regions</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <canvas id="status-breakdown-chart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="row g-3" id="component-cards"></div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Recent incidents</h6>
+                <span class="badge bg-success-subtle text-success" id="incidents-summary">Up to date</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Logged</th>
+                            <th scope="col">Severity</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incidents-table">
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">Fetching live data…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" integrity="sha384-hhJLRFmzSEAwL6MqFmoVh8ceiWdYymNdJyzpsgBbBKplAjE7YlN8YIJ0Dtdzb9SU" crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            const generatedEl = document.getElementById('status-generated');
+            const metricEls = document.querySelectorAll('[data-metric]');
+            const componentRoot = document.getElementById('component-cards');
+            const incidentsSummary = document.getElementById('incidents-summary');
+            const incidentsTable = document.getElementById('incidents-table');
+            const chartCtx = document.getElementById('status-breakdown-chart');
+            let breakdownChart = null;
+
+            async function loadStatus() {
+                try {
+                    const response = await fetch('/api/v1/status');
+                    if (!response.ok) {
+                        throw new Error('Unable to contact status API');
+                    }
+
+                    const payload = await response.json();
+                    updateDashboard(payload);
+                } catch (error) {
+                    console.error(error);
+                    generatedEl.textContent = 'unable to update';
+                    incidentsSummary.classList.remove('bg-success-subtle', 'text-success');
+                    incidentsSummary.classList.add('bg-danger-subtle', 'text-danger');
+                    incidentsSummary.textContent = 'Telemetry offline';
+                }
+            }
+
+            function updateDashboard(data) {
+                const generated = new Date(data.generatedAt);
+                generatedEl.textContent = generated.toLocaleString();
+
+                const totals = new Map();
+                const regionBreakdown = [];
+
+                (data.metrics || []).forEach((metric, index) => {
+                    if (index < 4) {
+                        totals.set(metric.label, metric.value);
+                    } else {
+                        regionBreakdown.push(metric);
+                    }
+                });
+
+                metricEls.forEach(el => {
+                    const label = el.getAttribute('data-metric');
+                    const value = totals.get(label) ?? '—';
+                    el.textContent = typeof value === 'number' ? value.toLocaleString(undefined, { maximumFractionDigits: 0 }) : value;
+                });
+
+                renderBreakdownChart(regionBreakdown);
+                renderComponents(data.components || []);
+                renderIncidents(data.incidents || []);
+            }
+
+            function renderBreakdownChart(metrics) {
+                if (!chartCtx) {
+                    return;
+                }
+
+                const labels = metrics.map(m => m.label);
+                const values = metrics.map(m => m.value);
+
+                if (breakdownChart) {
+                    breakdownChart.data.labels = labels;
+                    breakdownChart.data.datasets[0].data = values;
+                    breakdownChart.update();
+                    return;
+                }
+
+                breakdownChart = new Chart(chartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Branches per region',
+                                data: values,
+                                backgroundColor: '#006B3C'
+                            }
+                        ]
+                    },
+                    options: {
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#5D7A6D' } },
+                            y: { ticks: { color: '#5D7A6D' }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            function renderComponents(components) {
+                componentRoot.innerHTML = '';
+
+                if (!components.length) {
+                    componentRoot.innerHTML = '<div class="col-12 text-center text-muted">No component data available.</div>';
+                    return;
+                }
+
+                const statusBadgeMap = {
+                    Operational: 'bg-success',
+                    Scheduled: 'bg-warning text-dark',
+                    Degraded: 'bg-danger'
+                };
+
+                components.forEach(component => {
+                    const lastUpdated = new Date(component.lastUpdatedUtc);
+                    const badgeClass = statusBadgeMap[component.status] ?? 'bg-secondary';
+
+                    const card = document.createElement('div');
+                    card.className = 'col-lg-4 col-md-6';
+                    card.innerHTML = `
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">${component.name}</h6>
+                                    <span class="badge ${badgeClass}">${component.status}</span>
+                                </div>
+                                <p class="text-muted small mb-2">${component.summary}</p>
+                                <div class="text-muted small">Updated ${lastUpdated.toLocaleTimeString()}</div>
+                            </div>
+                        </div>`;
+
+                    componentRoot.appendChild(card);
+                });
+            }
+
+            function renderIncidents(incidents) {
+                incidentsTable.innerHTML = '';
+
+                if (!incidents.length) {
+                    incidentsSummary.classList.remove('bg-danger-subtle', 'text-danger');
+                    incidentsSummary.classList.add('bg-success-subtle', 'text-success');
+                    incidentsSummary.textContent = 'All clear';
+
+                    incidentsTable.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No incidents recorded.</td></tr>';
+                    return;
+                }
+
+                incidentsSummary.classList.remove('bg-success-subtle', 'text-success');
+                incidentsSummary.classList.add('bg-warning-subtle', 'text-warning');
+                incidentsSummary.textContent = `${incidents.length} open incident${incidents.length === 1 ? '' : 's'}`;
+
+                incidents.forEach(incident => {
+                    const logged = new Date(incident.loggedAtUtc);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${logged.toLocaleString()}</td>
+                        <td><span class="badge bg-danger">${incident.severity}</span></td>
+                        <td>${incident.title}</td>
+                        <td>${incident.description}</td>`;
+
+                    incidentsTable.appendChild(row);
+                });
+            }
+
+            loadStatus();
+            setInterval(loadStatus, 60000);
+        })();
+    </script>
+}

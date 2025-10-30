@@ -1,0 +1,175 @@
+@model MicrDbChequeProcessingSystem.ViewModels.RegionIndexViewModel
+
+@{
+    ViewData["Title"] = "Regions";
+    var items = Model?.Items ?? new List<MicrDbChequeProcessingSystem.ViewModels.RegionListItem>();
+}
+
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h5 class="mb-0">Regional Coverage</h5>
+            <small class="text-muted" data-role="count" data-count="@items.Count">@items.Count regions available.</small>
+        </div>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createRegionModal">
+            <i class="bi bi-plus-circle me-1"></i> Add New
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="regionTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Region</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Banks</th>
+                        <th scope="col">Branches</th>
+                        <th scope="col">Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (items.Any())
+                    {
+                        foreach (var region in items)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@region.Name</td>
+                                <td>@(string.IsNullOrWhiteSpace(region.Description) ? "—" : region.Description)</td>
+                                <td>@(region.Banks.HasValue ? region.Banks : 0)</td>
+                                <td>@(region.Branches.HasValue ? region.Branches : 0)</td>
+                                <td>@region.Created</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createRegionModal" tabindex="-1" aria-labelledby="createRegionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createRegionModalLabel">Add Region</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createRegionForm" asp-action="Create" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div class="alert alert-danger d-none" data-role="error"></div>
+                    <div class="mb-3">
+                        <label for="RegionName" class="form-label">Region Name</label>
+                        <input class="form-control" type="text" id="RegionName" name="RegionName" maxlength="150" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="RegionDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="RegionDescription" name="Description" rows="3" maxlength="400" placeholder="Optional details"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" data-role="save">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/duralux/vendors/js/dataTables.min.js" asp-append-version="true"></script>
+    <script src="~/duralux/vendors/js/dataTables.bs5.min.js" asp-append-version="true"></script>
+    <script>
+        $(function () {
+            const table = $('#regionTable').DataTable({
+                responsive: true
+            });
+
+            const modalElement = document.getElementById('createRegionModal');
+            const modal = new bootstrap.Modal(modalElement);
+            const form = $('#createRegionForm');
+            const saveButton = $('[data-role="save"]');
+            const errorBox = form.find('[data-role="error"]');
+            const countLabel = $('[data-role="count"]');
+            const maxAttempts = 3;
+
+            const resetError = () => {
+                errorBox.addClass('d-none').text('');
+            };
+
+            const showError = (message) => {
+                errorBox.removeClass('d-none').text(message);
+            };
+
+            saveButton.on('click', () => form.trigger('submit'));
+
+            form.on('submit', function (event) {
+                event.preventDefault();
+                resetError();
+
+                const formData = form.serialize();
+                saveButton.prop('disabled', true).text('Saving...');
+                let attempts = 0;
+
+                const submitRequest = () => {
+                    attempts += 1;
+
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: formData,
+                        success: function (result) {
+                            if (result?.success) {
+                                table.row.add([
+                                    result.data.regionName,
+                                    result.data.description || '—',
+                                    result.data.banks ?? 0,
+                                    result.data.branches ?? 0,
+                                    result.data.created
+                                ]).draw(false);
+
+                                const current = parseInt(countLabel.data('count'), 10) || 0;
+                                const nextCount = current + 1;
+                                countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} regions available.`);
+
+                                saveButton.prop('disabled', false).text('Save');
+                                form[0].reset();
+                                modal.hide();
+                                if (table.responsive) {
+                                    table.responsive.recalc();
+                                }
+                                return;
+                            }
+
+                            if (attempts < maxAttempts) {
+                                setTimeout(submitRequest, 700);
+                                return;
+                            }
+
+                            showError(result?.message || 'We could not save the record. Please try again.');
+                            saveButton.prop('disabled', false).text('Save');
+                        },
+                        error: function (xhr) {
+                            if (attempts < maxAttempts) {
+                                setTimeout(submitRequest, 700);
+                                return;
+                            }
+
+                            const message = xhr?.responseJSON?.message || 'We could not save the record. Please try again.';
+                            showError(message);
+                            saveButton.prop('disabled', false).text('Save');
+                        }
+                    });
+                };
+
+                submitRequest();
+            });
+
+            modalElement.addEventListener('hidden.bs.modal', () => {
+                form[0].reset();
+                resetError();
+                saveButton.prop('disabled', false).text('Save');
+            });
+        });
+    </script>
+}

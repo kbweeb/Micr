@@ -1,0 +1,1 @@
+// Legacy authentication model removed.

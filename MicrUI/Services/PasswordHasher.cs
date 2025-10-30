@@ -1,0 +1,1 @@
+// Legacy authentication helper removed.
