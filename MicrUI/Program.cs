@@ -76,7 +76,15 @@ using (var scope = app.Services.CreateScope())
     else if (provider.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
     {
         // Apply migrations on SQL Server to ensure model matches DB
-        dbContext.Database.Migrate();
+        try
+        {
+            dbContext.Database.Migrate();
+        }
+        catch (SqlException ex) when (ex.Number == 2714) // "There is already an object named ..."
+        {
+            // Database already has baseline objects without EF migration history.
+            // For development, continue startup and use existing schema.
+        }
     }
 }
 
