@@ -5,6 +5,8 @@ using System.Runtime.Versioning;
 using MicrDbChequeProcessingSystem.Data; // your data namespace
 using MicrDbChequeProcessingSystem.Services;
 using System.IO;
+using DataAccessLogic;
+using BusinessLogic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +63,9 @@ builder.Services.AddDbContext<MicrDbContext>(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ISystemStatusService, SystemStatusService>();
+// Register layered services (DataAccessLogic + BusinessLogic)
+builder.Services.AddDataAccessLogic(builder.Configuration);
+builder.Services.AddBusinessLogic();
 
 var app = builder.Build();
 
@@ -80,10 +85,13 @@ using (var scope = app.Services.CreateScope())
         {
             dbContext.Database.Migrate();
         }
-        catch (SqlException ex) when (ex.Number == 2714) // "There is already an object named ..."
+        catch (SqlException ex) when (ex.Number == 2714)
         {
             // Database already has baseline objects without EF migration history.
-            // For development, continue startup and use existing schema.
+        }
+        catch (Exception)
+        {
+            // In dev, do not block startup on migration errors; the site should still run.
         }
     }
 }
