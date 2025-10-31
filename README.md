@@ -120,5 +120,3 @@ If not already added, wire up registrations in MicrUI/Program.cs:
 - Keep only MicrUI runnable; class libraries should compile but not run directly.
 - Commit small, logical changes and open PRs.
 
----
-If you need me to pre-wire DI in MicrUI or provide sample seed data, say “wire it” and I’ll add it.
