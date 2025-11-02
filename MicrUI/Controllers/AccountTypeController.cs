@@ -16,6 +16,12 @@ public class AccountTypeController : Controller
         _context = context;
     }
 
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View(new AccountTypeCreateRequest());
+    }
+
     public async Task<IActionResult> Index()
     {
         var items = await _context.AccountTypes
@@ -33,6 +39,59 @@ public class AccountTypeController : Controller
         var viewModel = new AccountTypeIndexViewModel { Items = items };
 
         return View(viewModel);
+    }
+
+    // HTML form submit handler
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateForm(AccountTypeCreateRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("Create", request);
+        }
+
+        long createdBy = await ResolveCurrentUserId();
+        var name = request.AccountTypeName.Trim();
+
+        // Generate a unique code (same logic as JSON endpoint)
+        var baseCode = new string(name
+            .Where(char.IsLetterOrDigit)
+            .Take(10)
+            .Select(char.ToUpper)
+            .ToArray());
+        if (string.IsNullOrWhiteSpace(baseCode)) baseCode = "ACCTYPE";
+        var code = baseCode;
+        int i = 1;
+        while (await _context.AccountTypes.AnyAsync(a => a.AccountTypeCode == code))
+        {
+            code = (baseCode + i.ToString()).Substring(0, Math.Min(10, (baseCode + i.ToString()).Length));
+            i++;
+        }
+
+        var entry = new AccountType
+        {
+            AccountTypeName = name,
+            AccountTypeCode = code,
+            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
+            IsActive = true,
+            CreatedByUserId = createdBy,
+            CreatedDate = DateTime.UtcNow
+        };
+
+        try
+        {
+            _context.AccountTypes.Add(entry);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError(string.Empty, "We couldn't save the record. Please try again.");
+            return View("Create", request);
+        }
+
+        TempData["Message"] = "Account type created";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]

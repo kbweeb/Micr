@@ -16,6 +16,12 @@ public class RegionController : Controller
         _context = context;
     }
 
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View(new RegionCreateRequest());
+    }
+
     public async Task<IActionResult> Index()
     {
         var systemRegions = (await _context.RegionZones
@@ -40,6 +46,39 @@ public class RegionController : Controller
         };
 
         return View(viewModel);
+    }
+
+    // HTML form submit handler
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateForm(RegionCreateRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("Create", request);
+        }
+
+        var entry = new RegionZone
+        {
+            RegionName = request.RegionName.Trim(),
+            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
+            CreatedByUserId = await ResolveCurrentUserId(),
+            CreatedDate = DateTime.UtcNow
+        };
+
+        try
+        {
+            _context.RegionZones.Add(entry);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError(string.Empty, "We couldn't save the record. Please try again.");
+            return View("Create", request);
+        }
+
+        TempData["Message"] = "Region created";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
