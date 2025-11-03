@@ -1,3 +1,5 @@
+using BusinessLogic.Logic;
+using Domain.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +12,18 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 public class AccountTypeController : Controller
 {
     private readonly MicrDbContext _context;
+    private readonly IAccountTypeService _service;
 
-    public AccountTypeController(MicrDbContext context)
+    public AccountTypeController(MicrDbContext context, IAccountTypeService service)
     {
         _context = context;
+        _service = service;
+    }
+
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View(new AccountTypeCreateRequest());
     }
 
     public async Task<IActionResult> Index()
@@ -35,6 +45,37 @@ public class AccountTypeController : Controller
         return View(viewModel);
     }
 
+    // HTML form submit handler
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateForm(AccountTypeCreateRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("Create", request);
+        }
+
+        try
+        {
+            var createdBy = await ResolveCurrentUserId();
+            var dto = new AccountTypeCreateDto
+            {
+                AccountTypeName = request.AccountTypeName,
+                Description = request.Description,
+                CreatedByUserId = createdBy
+            };
+            await _service.CreateAsync(dto);
+        }
+        catch (Exception)
+        {
+            ModelState.AddModelError(string.Empty, "We couldn't save the record. Please try again.");
+            return View("Create", request);
+        }
+
+        TempData["Message"] = "Account type created";
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(AccountTypeCreateRequest request)
@@ -44,58 +85,33 @@ public class AccountTypeController : Controller
             return BadRequest(new { success = false, message = "Please provide the required details." });
         }
 
-        // Resolve current user id
-        long createdBy = await ResolveCurrentUserId();
-
-        // Generate a simple code from the name
-        var name = request.AccountTypeName.Trim();
-        var baseCode = new string(name
-            .Where(char.IsLetterOrDigit)
-            .Take(10)
-            .Select(char.ToUpper)
-            .ToArray());
-        if (string.IsNullOrWhiteSpace(baseCode)) baseCode = "ACCTYPE";
-
-        var code = baseCode;
-        int i = 1;
-        while (await _context.AccountTypes.AnyAsync(a => a.AccountTypeCode == code))
-        {
-            code = (baseCode + i.ToString()).Substring(0, Math.Min(10, (baseCode + i.ToString()).Length));
-            i++;
-        }
-
-        var entry = new AccountType
-        {
-            AccountTypeName = name,
-            AccountTypeCode = code,
-            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
-            IsActive = true,
-            CreatedByUserId = createdBy,
-            CreatedDate = DateTime.UtcNow
-        };
-
         try
         {
-            _context.AccountTypes.Add(entry);
-            await _context.SaveChangesAsync();
+            var createdBy = await ResolveCurrentUserId();
+            var dto = new AccountTypeCreateDto
+            {
+                AccountTypeName = request.AccountTypeName,
+                Description = request.Description,
+                CreatedByUserId = createdBy
+            };
+            var result = await _service.CreateAsync(dto);
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    id = result.AccountTypeId,
+                    accountTypeName = result.AccountTypeName,
+                    code = result.AccountTypeCode,
+                    description = result.Description,
+                    created = result.Created
+                }
+            });
         }
-        catch (DbUpdateException)
+        catch (Exception)
         {
             return StatusCode(500, new { success = false, message = "We couldn't save the record. Please try again." });
         }
-
-        return Json(new
-        {
-            success = true,
-            data = new
-            {
-                id = entry.AccountTypeId,
-                accountTypeName = entry.AccountTypeName,
-                code = entry.AccountTypeCode,
-                description = entry.Description,
-                created = entry.CreatedDate.ToLocalTime().ToString("dd MMM yyyy HH:mm")
-            }
-        });
     }
 
     private async Task<long> ResolveCurrentUserId()
