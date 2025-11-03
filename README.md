@@ -120,3 +120,38 @@ If not already added, wire up registrations in MicrUI/Program.cs:
 - Keep only MicrUI runnable; class libraries should compile but not run directly.
 - Commit small, logical changes and open PRs.
 
+## Appendix: Collaborator DB setup for AccountType/Region
+
+If AccountType/Region pages show no data and you cannot add records, check:
+
+1) UseInMemory must be false
+- MicrUI/appsettings.Development.json → set "UseInMemory": false
+
+2) One connection string for both readers and writers
+- MicrUI uses MicrDbContext for reads (Index pages)
+- BusinessLogic writes via DataAccessLogic/AppDataAccess using the same "DefaultConnection"
+- Prefer host,port to avoid SQL Browser dependency (e.g., Server=localhost,1433;Database=MicrDb;Trusted_Connection=True;TrustServerCertificate=True)
+
+3) Ensure required columns exist
+- Model expects Description column on [dbo].[AccountType] and [dbo].[Region(Zone)]
+```sql
+ALTER TABLE [dbo].[AccountType] ADD [Description] NVARCHAR(400) NULL;
+ALTER TABLE [dbo].[Region(Zone)] ADD [Description] NVARCHAR(400) NULL;
+```
+
+4) Ensure a UserProfile row exists (for CreatedByUserId FK)
+```sql
+IF NOT EXISTS (SELECT 1 FROM [dbo].[UserProfile])
+BEGIN
+  INSERT INTO [dbo].[UserProfile]
+    (Username, Firstname, Surname, EmailAddress, CreatedDate, ApprovedDate, ApprovedStatusId, CreatedByUserId, IsEnabled)
+  VALUES
+    (SUSER_SNAME(), 'Dev', 'User', 'dev@example.com', GETDATE(), GETDATE(), 1, 1, 1);
+END
+```
+
+5) Certificates
+- Add TrustServerCertificate=True in dev to avoid SSL trust errors
+
+6) Migrations
+- Program.cs attempts MicrUI migrations on startup; if DB already has objects, startup continues. Align schema as above if needed.
