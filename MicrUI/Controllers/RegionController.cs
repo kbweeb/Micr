@@ -1,3 +1,5 @@
+using BusinessLogic.Logic;
+using Domain.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +12,12 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 public class RegionController : Controller
 {
     private readonly MicrDbContext _context;
+    private readonly IRegionService _service;
 
-    public RegionController(MicrDbContext context)
+    public RegionController(MicrDbContext context, IRegionService service)
     {
         _context = context;
+        _service = service;
     }
 
     [HttpGet]
@@ -58,27 +62,24 @@ public class RegionController : Controller
             return View("Create", request);
         }
 
-        var entry = new RegionZone
-        {
-            RegionName = request.RegionName.Trim(),
-            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
-            CreatedByUserId = await ResolveCurrentUserId(),
-            CreatedDate = DateTime.UtcNow
-        };
-
         try
         {
-            _context.RegionZones.Add(entry);
-            await _context.SaveChangesAsync();
+            var createdBy = await ResolveCurrentUserId();
+            var dto = new RegionCreateDto
+            {
+                RegionName = request.RegionName,
+                Description = request.Description,
+                CreatedByUserId = createdBy
+            };
+            await _service.CreateAsync(dto);
+            TempData["Message"] = "Region created";
+            return RedirectToAction(nameof(Index));
         }
-        catch (DbUpdateException)
+        catch (Exception)
         {
             ModelState.AddModelError(string.Empty, "We couldn't save the record. Please try again.");
             return View("Create", request);
         }
-
-        TempData["Message"] = "Region created";
-        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
@@ -90,36 +91,33 @@ public class RegionController : Controller
             return BadRequest(new { success = false, message = "Please provide the required details." });
         }
 
-        var entry = new RegionZone
-        {
-            RegionName = request.RegionName.Trim(),
-            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
-            CreatedByUserId = await ResolveCurrentUserId(),
-            CreatedDate = DateTime.UtcNow
-        };
-
         try
         {
-            _context.RegionZones.Add(entry);
-            await _context.SaveChangesAsync();
+            var createdBy = await ResolveCurrentUserId();
+            var dto = new RegionCreateDto
+            {
+                RegionName = request.RegionName,
+                Description = request.Description,
+                CreatedByUserId = createdBy
+            };
+            var result = await _service.CreateAsync(dto);
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    regionName = result.RegionName,
+                    description = result.Description,
+                    created = result.Created,
+                    banks = 0,
+                    branches = 0
+                }
+            });
         }
-        catch (DbUpdateException)
+        catch (Exception)
         {
             return StatusCode(500, new { success = false, message = "We couldn't save the record. Please try again." });
         }
-
-        return Json(new
-        {
-            success = true,
-            data = new
-            {
-                regionName = entry.RegionName,
-                description = entry.Description,
-                created = (entry.CreatedDate ?? DateTime.UtcNow).ToLocalTime().ToString("dd MMM yyyy HH:mm"),
-                banks = 0,
-                branches = 0
-            }
-        });
     }
 
     private async Task<long> ResolveCurrentUserId()
