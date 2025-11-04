@@ -13,6 +13,8 @@ public static class BusinessLogicRegistration
         services.AddAutoMapper(cfg => cfg.AddProfile<BusinessMappingProfile>());
 
         services.AddScoped<IChequeService, ChequeService>();
+        services.AddScoped<IAccountTypeService, AccountTypeService>();
+        services.AddScoped<IRegionService, RegionService>();
 
         // Validators (registered for DI usage in services/controllers)
         services.AddScoped<FluentValidation.IValidator<Domain.DTOs.ChequeDto>, ChequeValidator>();

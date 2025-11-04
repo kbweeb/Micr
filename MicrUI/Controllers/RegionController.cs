@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MicrDbChequeProcessingSystem.Data;
 using MicrDbChequeProcessingSystem.Models;
 using MicrDbChequeProcessingSystem.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace MicrDbChequeProcessingSystem.Controllers;
 
@@ -13,11 +14,13 @@ public class RegionController : Controller
 {
     private readonly MicrDbContext _context;
     private readonly IRegionService _service;
+    private readonly ILogger<RegionController> _logger;
 
-    public RegionController(MicrDbContext context, IRegionService service)
+    public RegionController(MicrDbContext context, IRegionService service, ILogger<RegionController> logger)
     {
         _context = context;
         _service = service;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -36,6 +39,7 @@ public class RegionController : Controller
                 .ToListAsync())
             .Select(r => new RegionListItem
             {
+                Id = r.RegionId,
                 Name = r.RegionName,
                 Description = r.Description,
                 Created = (r.CreatedDate ?? DateTime.MinValue).ToString("dd MMM yyyy"),
@@ -84,15 +88,15 @@ public class RegionController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(RegionCreateRequest request)
+    public async Task<JsonResult> CreateUpdate(long? regionId, RegionCreateRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { success = false, message = "Please provide the required details." });
-        }
-
         try
         {
+            if (!ModelState.IsValid)
+            {
+                return Json(new { Success = false, Messages = "Please provide the required details." });
+            }
+
             var createdBy = await ResolveCurrentUserId();
             var dto = new RegionCreateDto
             {
@@ -100,23 +104,22 @@ public class RegionController : Controller
                 Description = request.Description,
                 CreatedByUserId = createdBy
             };
-            var result = await _service.CreateAsync(dto);
-            return Json(new
+
+            if (regionId.HasValue && regionId.Value > 0)
             {
-                success = true,
-                data = new
-                {
-                    regionName = result.RegionName,
-                    description = result.Description,
-                    created = result.Created,
-                    banks = 0,
-                    branches = 0
-                }
-            });
+                var updated = await _service.UpdateAsync(regionId.Value, dto);
+                _logger.LogInformation("Region updated successfully: {Id}", regionId.Value);
+                return Json(new { Success = true, Messages = "Region updated successfully!", data = updated });
+            }
+
+            var created = await _service.CreateAsync(dto);
+            _logger.LogInformation("New Region added successfully: {Id}", created.RegionId);
+            return Json(new { Success = true, Messages = "New Region added successfully!", data = created });
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return StatusCode(500, new { success = false, message = "We couldn't save the record. Please try again." });
+            _logger.LogError(ex, "Error adding/updating Region");
+            return Json(new { Success = false, Messages = "We couldn't save the record. Please try again." });
         }
     }
 

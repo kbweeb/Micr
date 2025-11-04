@@ -9,6 +9,7 @@ namespace BusinessLogic.Logic;
 public interface IAccountTypeService
 {
     Task<AccountTypeDto> CreateAsync(AccountTypeCreateDto dto, CancellationToken ct = default);
+    Task<AccountTypeDto> UpdateAsync(long accountTypeId, AccountTypeCreateDto dto, CancellationToken ct = default);
 }
 
 public class AccountTypeService : IAccountTypeService
@@ -43,6 +44,18 @@ public class AccountTypeService : IAccountTypeService
         entity.CreatedDate = DateTime.UtcNow;
 
         await _repo.AddAsync(entity, ct);
+        return _mapper.Map<AccountTypeDto>(entity);
+    }
+
+    public async Task<AccountTypeDto> UpdateAsync(long accountTypeId, AccountTypeCreateDto dto, CancellationToken ct = default)
+    {
+        var entity = await _repo.GetByIdAsync(accountTypeId, ct) ?? throw new KeyNotFoundException("Account type not found");
+
+        var name = dto.AccountTypeName.Trim();
+        entity.AccountTypeName = name;
+        entity.Description = dto.Description;
+
+        await _repo.UpdateAsync(entity, ct);
         return _mapper.Map<AccountTypeDto>(entity);
     }
 }
