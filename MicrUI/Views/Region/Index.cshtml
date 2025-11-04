@@ -112,6 +112,15 @@
 
             saveButton.on('click', () => form.trigger('submit'));
 
+            // When opening Add modal, reset mode to create
+            $('[data-bs-target="#createRegionModal"]').on('click', function () {
+                $('#RegionId').val('');
+                $('#RegionName').val('');
+                $('#RegionDescription').val('');
+                $('#createRegionModalLabel').text('Add Region');
+                saveButton.text('Save');
+            });
+
             // Open modal prefilled for edit
             $('#regionTable').on('click', '[data-role="edit"]', function () {
                 const btn = $(this);
@@ -121,6 +130,7 @@
                 $('#RegionName').val(data.name);
                 $('#RegionDescription').val(data.description || '');
                 $('#createRegionModalLabel').text('Edit Region');
+                saveButton.text('Update');
                 modal.show();
             });
 
@@ -128,7 +138,7 @@
                 event.preventDefault();
                 resetError();
 
-                const formData = form.serialize();
+                const serialize = () => form.serialize();
                 saveButton.prop('disabled', true).text('Saving...');
                 let attempts = 0;
 
@@ -138,29 +148,29 @@
                     $.ajax({
                         url: form.attr('action'),
                         method: 'POST',
-                        data: formData,
+                        data: serialize(),
                         success: function (result) {
                             if (result?.Success || result?.success) {
                                 const data = result.data || result.Data || {};
                                 const isUpdate = ($('#RegionId').val() || '').length > 0;
                                 if (isUpdate && editingRow) {
-                                    editingRow.data([
-                                        data.regionName || data.RegionName || $('#RegionName').val(),
-                                        data.description || $('#RegionDescription').val() || '—',
-                                        data.banks ?? editingRow.data()[2] ?? 0,
-                                        data.branches ?? editingRow.data()[3] ?? 0,
-                                        data.created || '—',
-                                        editingRow.data()[5] || `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${data.regionId || data.id}\" data-name=\"${data.regionName || $('#RegionName').val()}\" data-description=\"${data.description || $('#RegionDescription').val()}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`
-                                    ]).draw(false);
+                                    const id = data.regionId || data.RegionId || $('#RegionId').val();
+                                    const name = data.regionName || data.RegionName || $('#RegionName').val();
+                                    const desc = data.description ?? $('#RegionDescription').val() ?? '—';
+                                    const banks = data.banks ?? editingRow.data()[2] ?? 0;
+                                    const branches = data.branches ?? editingRow.data()[3] ?? 0;
+                                    const created = data.created || '—';
+                                    const actions = `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${id}\" data-name=\"${name}\" data-description=\"${desc}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`;
+                                    editingRow.data([name, desc || '—', banks, branches, created, actions]).draw(false);
                                 } else {
-                                    table.row.add([
-                                        data.regionName || $('#RegionName').val(),
-                                        data.description || $('#RegionDescription').val() || '—',
-                                        data.banks ?? 0,
-                                        data.branches ?? 0,
-                                        data.created || '—',
-                                        `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${data.regionId || data.id}\" data-name=\"${data.regionName || $('#RegionName').val()}\" data-description=\"${data.description || $('#RegionDescription').val()}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`
-                                    ]).draw(false);
+                                    const id = data.regionId || data.RegionId || '';
+                                    const name = data.regionName || data.RegionName || $('#RegionName').val();
+                                    const desc = data.description ?? $('#RegionDescription').val() ?? '—';
+                                    const banks = data.banks ?? 0;
+                                    const branches = data.branches ?? 0;
+                                    const created = data.created || '—';
+                                    const actions = `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${id}\" data-name=\"${name}\" data-description=\"${desc}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`;
+                                    table.row.add([name, desc || '—', banks, branches, created, actions]).draw(false);
 
                                     const current = parseInt(countLabel.data('count'), 10) || 0;
                                     const nextCount = current + 1;
@@ -171,6 +181,7 @@
                                 form[0].reset();
                                 $('#RegionId').val('');
                                 $('#createRegionModalLabel').text('Add Region');
+                                saveButton.text('Save');
                                 modal.hide();
                                 if (table.responsive) {
                                     table.responsive.recalc();
