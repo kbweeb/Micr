@@ -3,6 +3,7 @@ using Domain.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MicrDbChequeProcessingSystem.Data;
 using MicrDbChequeProcessingSystem.Models;
 using MicrDbChequeProcessingSystem.ViewModels;
@@ -13,11 +14,13 @@ public class AccountTypeController : Controller
 {
     private readonly MicrDbContext _context;
     private readonly IAccountTypeService _service;
+    private readonly ILogger<AccountTypeController> _logger;
 
-    public AccountTypeController(MicrDbContext context, IAccountTypeService service)
+    public AccountTypeController(MicrDbContext context, IAccountTypeService service, ILogger<AccountTypeController> logger)
     {
         _context = context;
         _service = service;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -33,6 +36,7 @@ public class AccountTypeController : Controller
             .OrderBy(a => a.AccountTypeName)
             .Select(a => new AccountTypeListItem
             {
+                Id = a.AccountTypeId,
                 Name = a.AccountTypeName,
                 Code = a.AccountTypeCode,
                 Description = a.Description,
@@ -78,15 +82,15 @@ public class AccountTypeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(AccountTypeCreateRequest request)
+    public async Task<JsonResult> CreateUpdate(long? accountTypeId, AccountTypeCreateRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { success = false, message = "Please provide the required details." });
-        }
-
         try
         {
+            if (!ModelState.IsValid)
+            {
+                return Json(new ResponseMessage { Success = false, Messages = "Please provide the required details." });
+            }
+
             var createdBy = await ResolveCurrentUserId();
             var dto = new AccountTypeCreateDto
             {
@@ -94,23 +98,24 @@ public class AccountTypeController : Controller
                 Description = request.Description,
                 CreatedByUserId = createdBy
             };
-            var result = await _service.CreateAsync(dto);
-            return Json(new
+
+            if (accountTypeId.HasValue && accountTypeId.Value > 0)
             {
-                success = true,
-                data = new
-                {
-                    id = result.AccountTypeId,
-                    accountTypeName = result.AccountTypeName,
-                    code = result.AccountTypeCode,
-                    description = result.Description,
-                    created = result.Created
-                }
-            });
+                var updated = await _service.UpdateAsync(accountTypeId.Value, dto);
+                _logger.LogInformation("Account Type updated successfully: {Id}", accountTypeId.Value);
+                return Json(new { Success = true, Messages = "Account Type updated successfully!", data = updated });
+            }
+            else
+            {
+                var created = await _service.CreateAsync(dto);
+                _logger.LogInformation("New Account Type added successfully: {Id}", created.AccountTypeId);
+                return Json(new { Success = true, Messages = "New Account Type added successfully!", data = created });
+            }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return StatusCode(500, new { success = false, message = "We couldn't save the record. Please try again." });
+            _logger.LogError(ex, "Error adding/updating Account Type");
+            return Json(new ResponseMessage { Success = false, Messages = "Could not add/update Account Type. Please contact the system administrator." });
         }
     }
 
@@ -123,4 +128,10 @@ public class AccountTypeController : Controller
                    await _context.UserProfiles.AsNoTracking().OrderBy(u => u.UserId).FirstOrDefaultAsync();
         return user?.UserId ?? 1;
     }
+}
+
+public class ResponseMessage
+{
+    public bool Success { get; set; }
+    public string Messages { get; set; } = string.Empty;
 }

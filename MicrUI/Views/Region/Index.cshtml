@@ -25,6 +25,7 @@
                         <th scope="col">Banks</th>
                         <th scope="col">Branches</th>
                         <th scope="col">Created</th>
+                        <th scope="col" class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,6 +39,12 @@
                                 <td>@(region.Banks.HasValue ? region.Banks : 0)</td>
                                 <td>@(region.Branches.HasValue ? region.Branches : 0)</td>
                                 <td>@region.Created</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="@region.Id" data-name="@region.Name" data-description="@region.Description">
+                                        <i class="bi bi-pencil-square"></i>
+                                        Edit
+                                    </button>
+                                </td>
                             </tr>
                         }
                     }
@@ -55,9 +62,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="createRegionForm" asp-action="Create" method="post" novalidate>
+                <form id="createRegionForm" asp-action="CreateUpdate" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     <div class="alert alert-danger d-none" data-role="error"></div>
+                    <input type="hidden" id="RegionId" name="regionId" />
                     <div class="mb-3">
                         <label for="RegionName" class="form-label">Region Name</label>
                         <input class="form-control" type="text" id="RegionName" name="RegionName" maxlength="150" required />
@@ -92,6 +100,7 @@
             const errorBox = form.find('[data-role="error"]');
             const countLabel = $('[data-role="count"]');
             const maxAttempts = 3;
+            let editingRow = null;
 
             const resetError = () => {
                 errorBox.addClass('d-none').text('');
@@ -102,6 +111,18 @@
             };
 
             saveButton.on('click', () => form.trigger('submit'));
+
+            // Open modal prefilled for edit
+            $('#regionTable').on('click', '[data-role="edit"]', function () {
+                const btn = $(this);
+                editingRow = table.row(btn.closest('tr'));
+                const data = btn.data();
+                $('#RegionId').val(data.id);
+                $('#RegionName').val(data.name);
+                $('#RegionDescription').val(data.description || '');
+                $('#createRegionModalLabel').text('Edit Region');
+                modal.show();
+            });
 
             form.on('submit', function (event) {
                 event.preventDefault();
@@ -119,21 +140,37 @@
                         method: 'POST',
                         data: formData,
                         success: function (result) {
-                            if (result?.success) {
-                                table.row.add([
-                                    result.data.regionName,
-                                    result.data.description || '—',
-                                    result.data.banks ?? 0,
-                                    result.data.branches ?? 0,
-                                    result.data.created
-                                ]).draw(false);
+                            if (result?.Success || result?.success) {
+                                const data = result.data || result.Data || {};
+                                const isUpdate = ($('#RegionId').val() || '').length > 0;
+                                if (isUpdate && editingRow) {
+                                    editingRow.data([
+                                        data.regionName || data.RegionName || $('#RegionName').val(),
+                                        data.description || $('#RegionDescription').val() || '—',
+                                        data.banks ?? editingRow.data()[2] ?? 0,
+                                        data.branches ?? editingRow.data()[3] ?? 0,
+                                        data.created || '—',
+                                        editingRow.data()[5] || `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${data.regionId || data.id}\" data-name=\"${data.regionName || $('#RegionName').val()}\" data-description=\"${data.description || $('#RegionDescription').val()}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`
+                                    ]).draw(false);
+                                } else {
+                                    table.row.add([
+                                        data.regionName || $('#RegionName').val(),
+                                        data.description || $('#RegionDescription').val() || '—',
+                                        data.banks ?? 0,
+                                        data.branches ?? 0,
+                                        data.created || '—',
+                                        `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${data.regionId || data.id}\" data-name=\"${data.regionName || $('#RegionName').val()}\" data-description=\"${data.description || $('#RegionDescription').val()}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`
+                                    ]).draw(false);
 
-                                const current = parseInt(countLabel.data('count'), 10) || 0;
-                                const nextCount = current + 1;
-                                countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} regions available.`);
+                                    const current = parseInt(countLabel.data('count'), 10) || 0;
+                                    const nextCount = current + 1;
+                                    countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} regions available.`);
+                                }
 
                                 saveButton.prop('disabled', false).text('Save');
                                 form[0].reset();
+                                $('#RegionId').val('');
+                                $('#createRegionModalLabel').text('Add Region');
                                 modal.hide();
                                 if (table.responsive) {
                                     table.responsive.recalc();
@@ -169,6 +206,9 @@
                 form[0].reset();
                 resetError();
                 saveButton.prop('disabled', false).text('Save');
+                $('#RegionId').val('');
+                $('#createRegionModalLabel').text('Add Region');
+                editingRow = null;
             });
         });
     </script>

@@ -24,6 +24,7 @@
                         <th scope="col">Code</th>
                         <th scope="col">Description</th>
                         <th scope="col">Created</th>
+                        <th scope="col" class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,6 +37,12 @@
                                 <td>@(string.IsNullOrWhiteSpace(item.Code) ? "—" : item.Code)</td>
                                 <td>@(string.IsNullOrWhiteSpace(item.Description) ? "—" : item.Description)</td>
                                 <td>@item.Created</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="@item.Id" data-name="@item.Name" data-description="@item.Description">
+                                        <i class="bi bi-pencil-square"></i>
+                                        Edit
+                                    </button>
+                                </td>
                             </tr>
                         }
                     }
@@ -53,9 +60,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="createAccountTypeForm" asp-action="Create" method="post" novalidate>
+                <form id="createAccountTypeForm" asp-action="CreateUpdate" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     <div class="alert alert-danger d-none" data-role="error"></div>
+                    <input type="hidden" id="AccountTypeId" name="accountTypeId" />
                     <div class="mb-3">
                         <label for="AccountTypeName" class="form-label">Account Type Name</label>
                         <input class="form-control" type="text" id="AccountTypeName" name="AccountTypeName" maxlength="150" required />
@@ -90,6 +98,7 @@
             const errorBox = form.find('[data-role="error"]');
             const countLabel = $('[data-role="count"]');
             const maxAttempts = 3;
+            let editingRow = null;
 
             const resetError = () => {
                 errorBox.addClass('d-none').text('');
@@ -100,6 +109,18 @@
             };
 
             saveButton.on('click', () => form.trigger('submit'));
+
+            // Open modal prefilled for edit
+            $('#accountTypeTable').on('click', '[data-role="edit"]', function () {
+                const btn = $(this);
+                editingRow = table.row(btn.closest('tr'));
+                const data = btn.data();
+                $('#AccountTypeId').val(data.id);
+                $('#AccountTypeName').val(data.name);
+                $('#Description').val(data.description || '');
+                $('#createAccountTypeModalLabel').text('Edit Account Type');
+                modal.show();
+            });
 
             form.on('submit', function (event) {
                 event.preventDefault();
@@ -117,20 +138,35 @@
                         method: 'POST',
                         data: formData,
                         success: function (result) {
-                            if (result?.success) {
-                                table.row.add([
-                                    result.data.accountTypeName,
-                                    result.data.code || '—',
-                                    result.data.description || '—',
-                                    result.data.created
-                                ]).draw(false);
+                            if (result?.Success || result?.success) {
+                                const data = result.data || result.Data || {};
+                                const isUpdate = ($('#AccountTypeId').val() || '').length > 0;
+                                if (isUpdate && editingRow) {
+                                    editingRow.data([
+                                        data.accountTypeName || data.AccountTypeName || $('#AccountTypeName').val(),
+                                        data.accountTypeCode || data.code || '—',
+                                        data.description || $('#Description').val() || '—',
+                                        data.created || '—',
+                                        editingRow.data()[4] || `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${data.accountTypeId || data.id}" data-name="${data.accountTypeName || $('#AccountTypeName').val()}" data-description="${data.description || $('#Description').val()}"><i class="bi bi-pencil-square"></i> Edit</button>`
+                                    ]).draw(false);
+                                } else {
+                                    const row = table.row.add([
+                                        data.accountTypeName || $('#AccountTypeName').val(),
+                                        data.accountTypeCode || data.code || '—',
+                                        data.description || $('#Description').val() || '—',
+                                        data.created || '—',
+                                        `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${data.accountTypeId || data.id}" data-name="${data.accountTypeName || $('#AccountTypeName').val()}" data-description="${data.description || $('#Description').val()}"><i class="bi bi-pencil-square"></i> Edit</button>`
+                                    ]).draw(false);
 
-                                const current = parseInt(countLabel.data('count'), 10) || 0;
-                                const nextCount = current + 1;
-                                countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} records available.`);
+                                    const current = parseInt(countLabel.data('count'), 10) || 0;
+                                    const nextCount = current + 1;
+                                    countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} records available.`);
+                                }
 
                                 saveButton.prop('disabled', false).text('Save');
                                 form[0].reset();
+                                $('#AccountTypeId').val('');
+                                $('#createAccountTypeModalLabel').text('Add Account Type');
                                 modal.hide();
                                 if (table.responsive) {
                                     table.responsive.recalc();
@@ -166,6 +202,9 @@
                 form[0].reset();
                 resetError();
                 saveButton.prop('disabled', false).text('Save');
+                $('#AccountTypeId').val('');
+                $('#createAccountTypeModalLabel').text('Add Account Type');
+                editingRow = null;
             });
         });
     </script>
