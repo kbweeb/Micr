@@ -1,3 +1,4 @@
+using AutoMapper;
 using DataAccessLogic;
 using Domain.DataTables;
 using Domain.DTOs;
@@ -13,9 +14,14 @@ public interface IAccountTypeService
 
 public class AccountTypeService : IAccountTypeService
 {
-    private readonly AppDataAccess _db;
+    private readonly IGenericDataAccess<AccountType> _repo;
+    private readonly IMapper _mapper;
 
-    public AccountTypeService(AppDataAccess db) => _db = db;
+    public AccountTypeService(IGenericDataAccess<AccountType> repo, IMapper mapper)
+    {
+        _repo = repo;
+        _mapper = mapper;
+    }
 
     public async Task<AccountTypeDto> CreateAsync(AccountTypeCreateDto dto, CancellationToken ct = default)
     {
@@ -27,40 +33,26 @@ public class AccountTypeService : IAccountTypeService
         if (string.IsNullOrWhiteSpace(baseCode)) baseCode = "ACCTYPE";
         var code = baseCode;
         int i = 1;
-        while (await _db.AccountTypes.AnyAsync(a => a.AccountTypeCode == code, ct))
+        while (await _repo.Queryable.AnyAsync(a => a.AccountTypeCode == code, ct))
         {
             var attempt = baseCode + i.ToString();
             code = attempt.Length > 10 ? attempt[..10] : attempt;
             i++;
         }
 
-        var entity = new AccountType
-        {
-            AccountTypeCode = code,
-            AccountTypeName = name,
-            Description = dto.Description,
-            IsActive = true,
-            CreatedByUserId = dto.CreatedByUserId,
-            CreatedDate = DateTime.UtcNow
-        };
+        var entity = _mapper.Map<AccountType>(dto);
+        entity.AccountTypeCode = code;
+        entity.AccountTypeName = name;
+        entity.IsActive = true;
+        entity.CreatedDate = DateTime.UtcNow;
 
-        await _db.AccountTypes.AddAsync(entity, ct);
-        await _db.SaveChangesAsync(ct);
-
-        return new AccountTypeDto
-        {
-            AccountTypeId = entity.AccountTypeId,
-            AccountTypeName = entity.AccountTypeName,
-            AccountTypeCode = entity.AccountTypeCode,
-            Description = entity.Description,
-            Created = entity.CreatedDate.ToLocalTime().ToString("dd MMM yyyy HH:mm")
-        };
+        await _repo.AddAsync(entity, ct);
+        return _mapper.Map<AccountTypeDto>(entity);
     }
 
     public async Task<AccountTypeDto> UpdateAsync(long accountTypeId, AccountTypeCreateDto dto, CancellationToken ct = default)
     {
-        var entity = await _db.AccountTypes.FirstOrDefaultAsync(a => a.AccountTypeId == accountTypeId, ct)
-                     ?? throw new KeyNotFoundException("Account type not found");
+        var entity = await _repo.GetByIdAsync(accountTypeId, ct) ?? throw new KeyNotFoundException("Account type not found");
 
         var name = (dto.AccountTypeName ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(name))
@@ -69,15 +61,7 @@ public class AccountTypeService : IAccountTypeService
         entity.AccountTypeName = name;
         entity.Description = dto.Description;
 
-        await _db.SaveChangesAsync(ct);
-
-        return new AccountTypeDto
-        {
-            AccountTypeId = entity.AccountTypeId,
-            AccountTypeName = entity.AccountTypeName,
-            AccountTypeCode = entity.AccountTypeCode,
-            Description = entity.Description,
-            Created = entity.CreatedDate.ToLocalTime().ToString("dd MMM yyyy HH:mm")
-        };
+        await _repo.UpdateAsync(entity, ct);
+        return _mapper.Map<AccountTypeDto>(entity);
     }
 }

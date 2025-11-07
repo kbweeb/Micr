@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +18,8 @@ public static class DataAccessRegistration
             services.AddDbContext<AppDataAccess>(o => o.UseSqlServer(conn));
         }
 
-        // KISS: No AutoMapper or generic repository registrations
+        services.AddAutoMapper(cfg => cfg.AddProfile<MappingSetup>());
+        services.AddScoped(typeof(IGenericDataAccess<>), typeof(GenericDataAccess<>));
         return services;
     }
 }
