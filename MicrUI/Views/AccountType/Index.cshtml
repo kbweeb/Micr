@@ -110,6 +110,15 @@
 
             saveButton.on('click', () => form.trigger('submit'));
 
+            // When opening the Add modal explicitly, reset mode to create
+            $('[data-bs-target="#createAccountTypeModal"]').on('click', function () {
+                $('#AccountTypeId').val('');
+                $('#AccountTypeName').val('');
+                $('#Description').val('');
+                $('#createAccountTypeModalLabel').text('Add Account Type');
+                saveButton.text('Save');
+            });
+
             // Open modal prefilled for edit
             $('#accountTypeTable').on('click', '[data-role="edit"]', function () {
                 const btn = $(this);
@@ -119,6 +128,7 @@
                 $('#AccountTypeName').val(data.name);
                 $('#Description').val(data.description || '');
                 $('#createAccountTypeModalLabel').text('Edit Account Type');
+                saveButton.text('Update');
                 modal.show();
             });
 
@@ -126,7 +136,7 @@
                 event.preventDefault();
                 resetError();
 
-                const formData = form.serialize();
+                const serialize = () => form.serialize();
                 saveButton.prop('disabled', true).text('Saving...');
                 let attempts = 0;
 
@@ -136,27 +146,27 @@
                     $.ajax({
                         url: form.attr('action'),
                         method: 'POST',
-                        data: formData,
+                        data: serialize(),
                         success: function (result) {
                             if (result?.Success || result?.success) {
                                 const data = result.data || result.Data || {};
                                 const isUpdate = ($('#AccountTypeId').val() || '').length > 0;
                                 if (isUpdate && editingRow) {
-                                    editingRow.data([
-                                        data.accountTypeName || data.AccountTypeName || $('#AccountTypeName').val(),
-                                        data.accountTypeCode || data.code || '—',
-                                        data.description || $('#Description').val() || '—',
-                                        data.created || '—',
-                                        editingRow.data()[4] || `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${data.accountTypeId || data.id}" data-name="${data.accountTypeName || $('#AccountTypeName').val()}" data-description="${data.description || $('#Description').val()}"><i class="bi bi-pencil-square"></i> Edit</button>`
-                                    ]).draw(false);
+                                    const id = data.accountTypeId || data.AccountTypeId || $('#AccountTypeId').val();
+                                    const name = data.accountTypeName || data.AccountTypeName || $('#AccountTypeName').val();
+                                    const desc = data.description ?? $('#Description').val() ?? '—';
+                                    const code = data.accountTypeCode || data.code || '—';
+                                    const created = data.created || '—';
+                                    const actions = `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${id}" data-name="${name}" data-description="${desc}"><i class="bi bi-pencil-square"></i> Edit</button>`;
+                                    editingRow.data([name, code, desc || '—', created, actions]).draw(false);
                                 } else {
-                                    const row = table.row.add([
-                                        data.accountTypeName || $('#AccountTypeName').val(),
-                                        data.accountTypeCode || data.code || '—',
-                                        data.description || $('#Description').val() || '—',
-                                        data.created || '—',
-                                        `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${data.accountTypeId || data.id}" data-name="${data.accountTypeName || $('#AccountTypeName').val()}" data-description="${data.description || $('#Description').val()}"><i class="bi bi-pencil-square"></i> Edit</button>`
-                                    ]).draw(false);
+                                    const id = data.accountTypeId || data.AccountTypeId || '';
+                                    const name = data.accountTypeName || data.AccountTypeName || $('#AccountTypeName').val();
+                                    const desc = data.description ?? $('#Description').val() ?? '—';
+                                    const code = data.accountTypeCode || data.code || '—';
+                                    const created = data.created || '—';
+                                    const actions = `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${id}\" data-name=\"${name}\" data-description=\"${desc}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`;
+                                    table.row.add([name, code, desc || '—', created, actions]).draw(false);
 
                                     const current = parseInt(countLabel.data('count'), 10) || 0;
                                     const nextCount = current + 1;
@@ -167,6 +177,7 @@
                                 form[0].reset();
                                 $('#AccountTypeId').val('');
                                 $('#createAccountTypeModalLabel').text('Add Account Type');
+                                saveButton.text('Save');
                                 modal.hide();
                                 if (table.responsive) {
                                     table.responsive.recalc();

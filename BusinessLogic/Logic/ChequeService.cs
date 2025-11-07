@@ -23,7 +23,14 @@ public class ChequeService : IChequeService
 
     public async Task<ChequeDto> CreateAsync(ChequeDto dto, CancellationToken ct = default)
     {
+        // simple validation
+        if (string.IsNullOrWhiteSpace(dto.Number))
+            throw new ArgumentException("Cheque number is required", nameof(dto.Number));
+        if (dto.Amount < 0)
+            throw new ArgumentException("Amount must be >= 0", nameof(dto.Amount));
+
         var entity = _mapper.Map<Cheque>(dto);
+        entity.Number = dto.Number?.Trim();
         await _repo.AddAsync(entity, ct);
         return _mapper.Map<ChequeDto>(entity);
     }

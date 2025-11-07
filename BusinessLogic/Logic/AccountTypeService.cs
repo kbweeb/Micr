@@ -8,6 +8,7 @@ namespace BusinessLogic.Logic;
 
 public interface IAccountTypeService
 {
+    Task<List<AccountTypeDto>> GetAllAsync(CancellationToken ct = default);
     Task<AccountTypeDto> CreateAsync(AccountTypeCreateDto dto, CancellationToken ct = default);
     Task<AccountTypeDto> UpdateAsync(long accountTypeId, AccountTypeCreateDto dto, CancellationToken ct = default);
 }
@@ -23,9 +24,21 @@ public class AccountTypeService : IAccountTypeService
         _mapper = mapper;
     }
 
+    public async Task<List<AccountTypeDto>> GetAllAsync(CancellationToken ct = default)
+    {
+        var query = _repo.Queryable
+            .OrderBy(a => a.AccountTypeName)
+            .Select(a => a);
+        var list = await query.ToListAsync(ct);
+        return _mapper.Map<List<AccountTypeDto>>(list);
+    }
+
     public async Task<AccountTypeDto> CreateAsync(AccountTypeCreateDto dto, CancellationToken ct = default)
     {
-        var name = dto.AccountTypeName.Trim();
+        var name = (dto.AccountTypeName ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Account type name is required", nameof(dto.AccountTypeName));
+
         var baseCode = new string(name.Where(char.IsLetterOrDigit).Take(10).Select(char.ToUpper).ToArray());
         if (string.IsNullOrWhiteSpace(baseCode)) baseCode = "ACCTYPE";
         var code = baseCode;
@@ -51,7 +64,10 @@ public class AccountTypeService : IAccountTypeService
     {
         var entity = await _repo.GetByIdAsync(accountTypeId, ct) ?? throw new KeyNotFoundException("Account type not found");
 
-        var name = dto.AccountTypeName.Trim();
+        var name = (dto.AccountTypeName ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Account type name is required", nameof(dto.AccountTypeName));
+
         entity.AccountTypeName = name;
         entity.Description = dto.Description;
 
