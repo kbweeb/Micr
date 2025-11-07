@@ -129,9 +129,3 @@ public class AccountTypeController : Controller
         return user?.UserId ?? 1;
     }
 }
-
-public class ResponseMessage
-{
-    public bool Success { get; set; }
-    public string Messages { get; set; } = string.Empty;
-}
