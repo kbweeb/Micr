@@ -2,11 +2,13 @@ using AutoMapper;
 using DataAccessLogic;
 using Domain.DataTables;
 using Domain.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Logic;
 
 public interface IRegionService
 {
+    Task<List<RegionIndexDto>> GetIndexAsync(CancellationToken ct = default);
     Task<RegionDto> CreateAsync(RegionCreateDto dto, CancellationToken ct = default);
     Task<RegionDto> UpdateAsync(long regionId, RegionCreateDto dto, CancellationToken ct = default);
 }
@@ -20,6 +22,23 @@ public class RegionService : IRegionService
     {
         _repo = repo;
         _mapper = mapper;
+    }
+
+    public async Task<List<RegionIndexDto>> GetIndexAsync(CancellationToken ct = default)
+    {
+        var query = _repo.Queryable
+            .Select(r => new RegionIndexDto
+            {
+                RegionId = r.RegionId,
+                RegionName = r.RegionName,
+                Description = r.Description,
+                Created = (r.CreatedDate ?? DateTime.MinValue).ToLocalTime().ToString("dd MMM yyyy"),
+                Banks = r.Banks.Count,
+                Branches = r.Banks.SelectMany(b => b.BankBranches).Count()
+            })
+            .OrderBy(r => r.RegionName);
+
+        return await query.ToListAsync(ct);
     }
 
     public async Task<RegionDto> CreateAsync(RegionCreateDto dto, CancellationToken ct = default)

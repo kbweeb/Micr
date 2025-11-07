@@ -12,13 +12,11 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class RegionController : Controller
 {
-    private readonly MicrDbContext _context;
     private readonly IRegionService _service;
     private readonly ILogger<RegionController> _logger;
 
-    public RegionController(MicrDbContext context, IRegionService service, ILogger<RegionController> logger)
+    public RegionController(IRegionService service, ILogger<RegionController> logger)
     {
-        _context = context;
         _service = service;
         _logger = logger;
     }
@@ -31,29 +29,18 @@ public class RegionController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var systemRegions = (await _context.RegionZones
-                .Include(r => r.Banks)
-                    .ThenInclude(b => b.BankBranches)
-                .AsNoTracking()
-                .OrderBy(r => r.RegionName)
-                .ToListAsync())
-            .Select(r => new RegionListItem
-            {
-                Id = r.RegionId,
-                Name = r.RegionName,
-                Description = r.Description,
-                Created = (r.CreatedDate ?? DateTime.MinValue).ToString("dd MMM yyyy"),
-                Banks = r.Banks.Count,
-                Branches = r.Banks.Sum(b => b.BankBranches.Count)
-            })
-            .ToList();
-
-        var viewModel = new RegionIndexViewModel
+        var list = await _service.GetIndexAsync();
+        var items = list.Select(r => new RegionListItem
         {
-            Items = systemRegions
-        };
+            Id = r.RegionId,
+            Name = r.RegionName,
+            Description = r.Description,
+            Created = r.Created,
+            Banks = r.Banks,
+            Branches = r.Branches
+        }).ToList();
 
-        return View(viewModel);
+        return View(new RegionIndexViewModel { Items = items });
     }
 
     // HTML form submit handler
@@ -123,13 +110,5 @@ public class RegionController : Controller
         }
     }
 
-    private async Task<long> ResolveCurrentUserId()
-    {
-        var winUser = Environment.UserName;
-        var user = await _context.UserProfiles.AsNoTracking()
-            .OrderBy(u => u.UserId)
-            .FirstOrDefaultAsync(u => u.Username == winUser) ??
-                   await _context.UserProfiles.AsNoTracking().OrderBy(u => u.UserId).FirstOrDefaultAsync();
-        return user?.UserId ?? 1;
-    }
+    private Task<long> ResolveCurrentUserId() => Task.FromResult(1L);
 }

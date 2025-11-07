@@ -9,4 +9,7 @@ public class RegionZone
     public string? Description { get; set; }
     public long? CreatedByUserId { get; set; }
     public DateTime? CreatedDate { get; set; }
+
+    // Navigation for step-down aggregation
+    public ICollection<Bank> Banks { get; set; } = new List<Bank>();
 }
