@@ -12,13 +12,11 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class AccountTypeController : Controller
 {
-    private readonly MicrDbContext _context;
     private readonly IAccountTypeService _service;
     private readonly ILogger<AccountTypeController> _logger;
 
-    public AccountTypeController(MicrDbContext context, IAccountTypeService service, ILogger<AccountTypeController> logger)
+    public AccountTypeController(IAccountTypeService service, ILogger<AccountTypeController> logger)
     {
-        _context = context;
         _service = service;
         _logger = logger;
     }
@@ -31,22 +29,17 @@ public class AccountTypeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var items = await _context.AccountTypes
-            .AsNoTracking()
-            .OrderBy(a => a.AccountTypeName)
-            .Select(a => new AccountTypeListItem
-            {
-                Id = a.AccountTypeId,
-                Name = a.AccountTypeName,
-                Code = a.AccountTypeCode,
-                Description = a.Description,
-                Created = a.CreatedDate.ToString("dd MMM yyyy")
-            })
-            .ToListAsync();
+        var list = await _service.GetAllAsync();
+        var items = list.Select(a => new AccountTypeListItem
+        {
+            Id = a.AccountTypeId,
+            Name = a.AccountTypeName,
+            Code = a.AccountTypeCode,
+            Description = a.Description,
+            Created = a.Created
+        }).ToList();
 
-        var viewModel = new AccountTypeIndexViewModel { Items = items };
-
-        return View(viewModel);
+        return View(new AccountTypeIndexViewModel { Items = items });
     }
 
     // HTML form submit handler
@@ -119,13 +112,5 @@ public class AccountTypeController : Controller
         }
     }
 
-    private async Task<long> ResolveCurrentUserId()
-    {
-        var winUser = Environment.UserName;
-        var user = await _context.UserProfiles.AsNoTracking()
-            .OrderBy(u => u.UserId)
-            .FirstOrDefaultAsync(u => u.Username == winUser) ??
-                   await _context.UserProfiles.AsNoTracking().OrderBy(u => u.UserId).FirstOrDefaultAsync();
-        return user?.UserId ?? 1;
-    }
+    private Task<long> ResolveCurrentUserId() => Task.FromResult(1L);
 }

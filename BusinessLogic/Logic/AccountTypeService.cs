@@ -8,6 +8,7 @@ namespace BusinessLogic.Logic;
 
 public interface IAccountTypeService
 {
+    Task<List<AccountTypeDto>> GetAllAsync(CancellationToken ct = default);
     Task<AccountTypeDto> CreateAsync(AccountTypeCreateDto dto, CancellationToken ct = default);
     Task<AccountTypeDto> UpdateAsync(long accountTypeId, AccountTypeCreateDto dto, CancellationToken ct = default);
 }
@@ -21,6 +22,15 @@ public class AccountTypeService : IAccountTypeService
     {
         _repo = repo;
         _mapper = mapper;
+    }
+
+    public async Task<List<AccountTypeDto>> GetAllAsync(CancellationToken ct = default)
+    {
+        var query = _repo.Queryable
+            .OrderBy(a => a.AccountTypeName)
+            .Select(a => a);
+        var list = await query.ToListAsync(ct);
+        return _mapper.Map<List<AccountTypeDto>>(list);
     }
 
     public async Task<AccountTypeDto> CreateAsync(AccountTypeCreateDto dto, CancellationToken ct = default)
