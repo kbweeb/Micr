@@ -188,7 +188,7 @@
                                 return;
                             }
 
-                            showError(result?.message || 'We could not save the record. Please try again.');
+                            showError(result?.Messages || result?.messages || result?.Message || result?.message || 'We could not save the record. Please try again.');
                             saveButton.prop('disabled', false).text('Save');
                         },
                         error: function (xhr) {
@@ -197,7 +197,7 @@
                                 return;
                             }
 
-                            const message = xhr?.responseJSON?.message || 'We could not save the record. Please try again.';
+                            const message = xhr?.responseJSON?.Messages || xhr?.responseJSON?.messages || xhr?.responseJSON?.Message || xhr?.responseJSON?.message || 'We could not save the record. Please try again.';
                             showError(message);
                             saveButton.prop('disabled', false).text('Save');
                         }
