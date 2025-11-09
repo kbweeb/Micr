@@ -108,11 +108,30 @@ public class RegionController : Controller
                 CreatedByUserId = createdBy
             };
 
+            // Basic duplicate/name validation mirroring legacy behavior
+            var existing = await _appLogic.GetRegionsIndexAsync();
+            var normalizedName = (request.RegionName ?? string.Empty).Trim().ToLowerInvariant();
+
             if (regionId.HasValue && regionId.Value > 0)
             {
+                if (!existing.Any(r => r.RegionId == regionId.Value))
+                {
+                    return Json(new ResponseMessage { Success = false, Messages = "Selected Region was not found." });
+                }
+
+                if (existing.Any(r => (r.RegionName ?? string.Empty).Trim().ToLowerInvariant() == normalizedName && r.RegionId != regionId.Value))
+                {
+                    return Json(new ResponseMessage { Success = false, Messages = "Region name already exists." });
+                }
+
                 await _appLogic.UpdateRegionAsync(regionId.Value, dto);
                 _logger.LogInformation("Region updated successfully: {Id}", regionId.Value);
                 return Json(new ResponseMessage { Success = true, Messages = "Region updated successfully!" });
+            }
+
+            if (existing.Any(r => (r.RegionName ?? string.Empty).Trim().ToLowerInvariant() == normalizedName))
+            {
+                return Json(new ResponseMessage { Success = false, Messages = "Region name already exists." });
             }
 
             var created = await _appLogic.CreateRegionAsync(dto);
