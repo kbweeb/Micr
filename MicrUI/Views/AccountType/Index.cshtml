@@ -60,7 +60,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="createAccountTypeForm" asp-action="CreateUpdate" method="post" novalidate>
+                <form id="createAccountTypeForm" asp-action="CreateUpdateAccountType" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     <div class="alert alert-danger d-none" data-role="error"></div>
                     <input type="hidden" id="AccountTypeId" name="accountTypeId" />
@@ -87,9 +87,7 @@
     <script src="~/duralux/vendors/js/dataTables.bs5.min.js" asp-append-version="true"></script>
     <script>
         $(function () {
-            const table = $('#accountTypeTable').DataTable({
-                responsive: true
-            });
+            const table = $('#accountTypeTable').DataTable({ responsive: true });
 
             const modalElement = document.getElementById('createAccountTypeModal');
             const modal = new bootstrap.Modal(modalElement);
@@ -107,6 +105,26 @@
             const showError = (message) => {
                 errorBox.removeClass('d-none').text(message);
             };
+
+            const refreshTable = () => {
+                $.getJSON('/AccountType/GetAccountTypeData', function (resp) {
+                    if (!resp || !(resp.Success || resp.success)) return;
+                    const rows = (resp.data || []).map(function (a) {
+                        const id = a.accountTypeId;
+                        const name = a.accountTypeName || '—';
+                        const code = a.code || '—';
+                        const desc = a.description || '—';
+                        const created = a.created || '—';
+                        const actions = `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${id}" data-name="${name}" data-description="${desc}"><i class="bi bi-pencil-square"></i> Edit</button>`;
+                        return [name, code, desc, created, actions];
+                    });
+                    table.clear().rows.add(rows).draw(false);
+                    const nextCount = rows.length;
+                    countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} records available.`);
+                });
+            };
+
+            refreshTable();
 
             saveButton.on('click', () => form.trigger('submit'));
 
@@ -149,39 +167,14 @@
                         data: serialize(),
                         success: function (result) {
                             if (result?.Success || result?.success) {
-                                const data = result.data || result.Data || {};
-                                const isUpdate = ($('#AccountTypeId').val() || '').length > 0;
-                                if (isUpdate && editingRow) {
-                                    const id = data.accountTypeId || data.AccountTypeId || $('#AccountTypeId').val();
-                                    const name = data.accountTypeName || data.AccountTypeName || $('#AccountTypeName').val();
-                                    const desc = data.description ?? $('#Description').val() ?? '—';
-                                    const code = data.accountTypeCode || data.code || '—';
-                                    const created = data.created || '—';
-                                    const actions = `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${id}" data-name="${name}" data-description="${desc}"><i class="bi bi-pencil-square"></i> Edit</button>`;
-                                    editingRow.data([name, code, desc || '—', created, actions]).draw(false);
-                                } else {
-                                    const id = data.accountTypeId || data.AccountTypeId || '';
-                                    const name = data.accountTypeName || data.AccountTypeName || $('#AccountTypeName').val();
-                                    const desc = data.description ?? $('#Description').val() ?? '—';
-                                    const code = data.accountTypeCode || data.code || '—';
-                                    const created = data.created || '—';
-                                    const actions = `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${id}\" data-name=\"${name}\" data-description=\"${desc}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`;
-                                    table.row.add([name, code, desc || '—', created, actions]).draw(false);
-
-                                    const current = parseInt(countLabel.data('count'), 10) || 0;
-                                    const nextCount = current + 1;
-                                    countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} records available.`);
-                                }
-
+                                // ResponseMessage only; reload table to get authoritative data/IDs
+                                refreshTable();
                                 saveButton.prop('disabled', false).text('Save');
                                 form[0].reset();
                                 $('#AccountTypeId').val('');
                                 $('#createAccountTypeModalLabel').text('Add Account Type');
                                 saveButton.text('Save');
                                 modal.hide();
-                                if (table.responsive) {
-                                    table.responsive.recalc();
-                                }
                                 return;
                             }
 

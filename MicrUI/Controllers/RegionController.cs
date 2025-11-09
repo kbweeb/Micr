@@ -73,9 +73,25 @@ public class RegionController : Controller
         }
     }
 
+    [HttpGet]
+    public async Task<JsonResult> GetRegionData()
+    {
+        var list = await _appLogic.GetRegionsIndexAsync();
+        var data = list.Select(r => new
+        {
+            regionId = r.RegionId,
+            regionName = r.RegionName,
+            description = r.Description,
+            banks = r.Banks,
+            branches = r.Branches,
+            created = r.Created
+        }).ToList();
+        return Json(new { data, Success = true });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? regionId, RegionCreateRequest request)
+    public async Task<JsonResult> CreateUpdateRegion(long? regionId, RegionCreateRequest request)
     {
         try
         {
@@ -94,14 +110,14 @@ public class RegionController : Controller
 
             if (regionId.HasValue && regionId.Value > 0)
             {
-                var updated = await _appLogic.UpdateRegionAsync(regionId.Value, dto);
+                await _appLogic.UpdateRegionAsync(regionId.Value, dto);
                 _logger.LogInformation("Region updated successfully: {Id}", regionId.Value);
-                return Json(new { Success = true, Messages = "Region updated successfully!", data = updated });
+                return Json(new ResponseMessage { Success = true, Messages = "Region updated successfully!" });
             }
 
             var created = await _appLogic.CreateRegionAsync(dto);
             _logger.LogInformation("New Region added successfully: {Id}", created.RegionId);
-            return Json(new { Success = true, Messages = "New Region added successfully!", data = created });
+            return Json(new ResponseMessage { Success = true, Messages = "New Region added successfully!" });
         }
         catch (Exception ex)
         {

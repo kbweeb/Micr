@@ -42,40 +42,24 @@ public class AccountTypeController : Controller
         return View(new AccountTypeIndexViewModel { Items = items });
     }
 
-    // HTML form submit handler
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateForm(AccountTypeCreateRequest request)
+    [HttpGet]
+    public async Task<JsonResult> GetAccountTypeData()
     {
-        if (!ModelState.IsValid)
+        var list = await _appLogic.GetAccountTypesAsync();
+        var data = list.Select(a => new
         {
-            return View("Create", request);
-        }
-
-        try
-        {
-            var createdBy = await ResolveCurrentUserId();
-            var dto = new AccountTypeCreateDto
-            {
-                AccountTypeName = request.AccountTypeName,
-                Description = request.Description,
-                CreatedByUserId = createdBy
-            };
-            await _appLogic.CreateAccountTypeAsync(dto);
-        }
-        catch (Exception)
-        {
-            ModelState.AddModelError(string.Empty, "We couldn't save the record. Please try again.");
-            return View("Create", request);
-        }
-
-        TempData["Message"] = "Account type created";
-        return RedirectToAction(nameof(Index));
+            accountTypeId = a.AccountTypeId,
+            accountTypeName = a.AccountTypeName,
+            description = a.Description,
+            code = a.AccountTypeCode,
+            created = a.Created
+        }).ToList();
+        return Json(new { data, Success = true });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? accountTypeId, AccountTypeCreateRequest request)
+    public async Task<JsonResult> CreateUpdateAccountType(long? accountTypeId, AccountTypeCreateRequest request)
     {
         try
         {
@@ -94,15 +78,15 @@ public class AccountTypeController : Controller
 
             if (accountTypeId.HasValue && accountTypeId.Value > 0)
             {
-                var updated = await _appLogic.UpdateAccountTypeAsync(accountTypeId.Value, dto);
+                await _appLogic.UpdateAccountTypeAsync(accountTypeId.Value, dto);
                 _logger.LogInformation("Account Type updated successfully: {Id}", accountTypeId.Value);
-                return Json(new { Success = true, Messages = "Account Type updated successfully!", data = updated });
+                return Json(new ResponseMessage { Success = true, Messages = "Account Type updated successfully!" });
             }
             else
             {
                 var created = await _appLogic.CreateAccountTypeAsync(dto);
                 _logger.LogInformation("New Account Type added successfully: {Id}", created.AccountTypeId);
-                return Json(new { Success = true, Messages = "New Account Type added successfully!", data = created });
+                return Json(new ResponseMessage { Success = true, Messages = "New Account Type added successfully!" });
             }
         }
         catch (Exception ex)

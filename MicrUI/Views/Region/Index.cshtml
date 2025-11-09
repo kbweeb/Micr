@@ -62,7 +62,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="createRegionForm" asp-action="CreateUpdate" method="post" novalidate>
+                <form id="createRegionForm" asp-action="CreateUpdateRegion" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     <div class="alert alert-danger d-none" data-role="error"></div>
                     <input type="hidden" id="RegionId" name="regionId" />
@@ -92,6 +92,27 @@
             const table = $('#regionTable').DataTable({
                 responsive: true
             });
+            const refreshTable = () => {
+                $.getJSON('/Region/GetRegionData', function (resp) {
+                    if (!resp || !(resp.Success || resp.success)) return;
+                    const rows = (resp.data || []).map(function (r) {
+                        const id = r.regionId;
+                        const name = r.regionName || '—';
+                        const desc = r.description || '—';
+                        const banks = r.banks ?? 0;
+                        const branches = r.branches ?? 0;
+                        const created = r.created || '—';
+                        const actions = `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${id}" data-name="${name}" data-description="${desc}"><i class="bi bi-pencil-square"></i> Edit</button>`;
+                        return [name, desc, banks, branches, created, actions];
+                    });
+                    table.clear().rows.add(rows).draw(false);
+                    const nextCount = rows.length;
+                    countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} regions available.`);
+                });
+            };
+
+            refreshTable();
+
 
             const modalElement = document.getElementById('createRegionModal');
             const modal = new bootstrap.Modal(modalElement);
@@ -151,41 +172,14 @@
                         data: serialize(),
                         success: function (result) {
                             if (result?.Success || result?.success) {
-                                const data = result.data || result.Data || {};
-                                const isUpdate = ($('#RegionId').val() || '').length > 0;
-                                if (isUpdate && editingRow) {
-                                    const id = data.regionId || data.RegionId || $('#RegionId').val();
-                                    const name = data.regionName || data.RegionName || $('#RegionName').val();
-                                    const desc = data.description ?? $('#RegionDescription').val() ?? '—';
-                                    const banks = data.banks ?? editingRow.data()[2] ?? 0;
-                                    const branches = data.branches ?? editingRow.data()[3] ?? 0;
-                                    const created = data.created || '—';
-                                    const actions = `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${id}\" data-name=\"${name}\" data-description=\"${desc}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`;
-                                    editingRow.data([name, desc || '—', banks, branches, created, actions]).draw(false);
-                                } else {
-                                    const id = data.regionId || data.RegionId || '';
-                                    const name = data.regionName || data.RegionName || $('#RegionName').val();
-                                    const desc = data.description ?? $('#RegionDescription').val() ?? '—';
-                                    const banks = data.banks ?? 0;
-                                    const branches = data.branches ?? 0;
-                                    const created = data.created || '—';
-                                    const actions = `<button type=\"button\" class=\"btn btn-sm btn-primary\" data-role=\"edit\" data-id=\"${id}\" data-name=\"${name}\" data-description=\"${desc}\"><i class=\"bi bi-pencil-square\"></i> Edit</button>`;
-                                    table.row.add([name, desc || '—', banks, branches, created, actions]).draw(false);
-
-                                    const current = parseInt(countLabel.data('count'), 10) || 0;
-                                    const nextCount = current + 1;
-                                    countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} regions available.`);
-                                }
-
+                                // ResponseMessage only; reload table so IDs are correct
+                                refreshTable();
                                 saveButton.prop('disabled', false).text('Save');
                                 form[0].reset();
                                 $('#RegionId').val('');
                                 $('#createRegionModalLabel').text('Add Region');
                                 saveButton.text('Save');
                                 modal.hide();
-                                if (table.responsive) {
-                                    table.responsive.recalc();
-                                }
                                 return;
                             }
 
