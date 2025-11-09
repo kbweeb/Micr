@@ -14,11 +14,13 @@ public class AccountTypeController : Controller
 {
     private readonly IApplicationLogic _appLogic;
     private readonly ILogger<AccountTypeController> _logger;
+    private readonly MicrDbContext _db;
 
-    public AccountTypeController(IApplicationLogic appLogic, ILogger<AccountTypeController> logger)
+    public AccountTypeController(IApplicationLogic appLogic, ILogger<AccountTypeController> logger, MicrDbContext db)
     {
         _appLogic = appLogic;
         _logger = logger;
+        _db = db;
     }
 
     [HttpGet]
@@ -118,5 +120,26 @@ public class AccountTypeController : Controller
         }
     }
 
-    private Task<long> ResolveCurrentUserId() => Task.FromResult(1L);
+    private async Task<long> ResolveCurrentUserId()
+    {
+        // If authentication is wired, try to match by username
+        var username = User?.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            var userMatch = await _db.UserProfiles
+                .AsNoTracking()
+                .Where(u => u.Username == username)
+                .Select(u => (long?)u.UserId)
+                .FirstOrDefaultAsync();
+            if (userMatch.HasValue) return userMatch.Value;
+        }
+
+        // Fallback: use the first available user id
+        var anyUserId = await _db.UserProfiles
+            .AsNoTracking()
+            .OrderBy(u => u.UserId)
+            .Select(u => (long?)u.UserId)
+            .FirstOrDefaultAsync();
+        return anyUserId ?? 1L;
+    }
 }

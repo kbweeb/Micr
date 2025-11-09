@@ -14,11 +14,13 @@ public class RegionController : Controller
 {
     private readonly IApplicationLogic _appLogic;
     private readonly ILogger<RegionController> _logger;
+    private readonly MicrDbContext _db;
 
-    public RegionController(IApplicationLogic appLogic, ILogger<RegionController> logger)
+    public RegionController(IApplicationLogic appLogic, ILogger<RegionController> logger, MicrDbContext db)
     {
         _appLogic = appLogic;
         _logger = logger;
+        _db = db;
     }
 
     [HttpGet]
@@ -145,5 +147,24 @@ public class RegionController : Controller
         }
     }
 
-    private Task<long> ResolveCurrentUserId() => Task.FromResult(1L);
+    private async Task<long> ResolveCurrentUserId()
+    {
+        var username = User?.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            var userMatch = await _db.UserProfiles
+                .AsNoTracking()
+                .Where(u => u.Username == username)
+                .Select(u => (long?)u.UserId)
+                .FirstOrDefaultAsync();
+            if (userMatch.HasValue) return userMatch.Value;
+        }
+
+        var anyUserId = await _db.UserProfiles
+            .AsNoTracking()
+            .OrderBy(u => u.UserId)
+            .Select(u => (long?)u.UserId)
+            .FirstOrDefaultAsync();
+        return anyUserId ?? 1L;
+    }
 }

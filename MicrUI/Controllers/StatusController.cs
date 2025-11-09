@@ -112,5 +112,24 @@ public class StatusController : Controller
         }
     }
 
-    private Task<long> ResolveCurrentUserId() => Task.FromResult(1L);
+    private async Task<long> ResolveCurrentUserId()
+    {
+        var username = User?.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            var userMatch = await _context.UserProfiles
+                .AsNoTracking()
+                .Where(u => u.Username == username)
+                .Select(u => (long?)u.UserId)
+                .FirstOrDefaultAsync();
+            if (userMatch.HasValue) return userMatch.Value;
+        }
+
+        var anyUserId = await _context.UserProfiles
+            .AsNoTracking()
+            .OrderBy(u => u.UserId)
+            .Select(u => (long?)u.UserId)
+            .FirstOrDefaultAsync();
+        return anyUserId ?? 1L;
+    }
 }
