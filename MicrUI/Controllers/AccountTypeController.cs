@@ -12,12 +12,12 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class AccountTypeController : Controller
 {
-    private readonly IAccountTypeService _service;
+    private readonly IApplicationLogic _appLogic;
     private readonly ILogger<AccountTypeController> _logger;
 
-    public AccountTypeController(IAccountTypeService service, ILogger<AccountTypeController> logger)
+    public AccountTypeController(IApplicationLogic appLogic, ILogger<AccountTypeController> logger)
     {
-        _service = service;
+        _appLogic = appLogic;
         _logger = logger;
     }
 
@@ -29,7 +29,7 @@ public class AccountTypeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetAllAsync();
+        var list = await _appLogic.GetAccountTypesAsync();
         var items = list.Select(a => new AccountTypeListItem
         {
             Id = a.AccountTypeId,
@@ -61,7 +61,7 @@ public class AccountTypeController : Controller
                 Description = request.Description,
                 CreatedByUserId = createdBy
             };
-            await _service.CreateAsync(dto);
+            await _appLogic.CreateAccountTypeAsync(dto);
         }
         catch (Exception)
         {
@@ -94,13 +94,13 @@ public class AccountTypeController : Controller
 
             if (accountTypeId.HasValue && accountTypeId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(accountTypeId.Value, dto);
+                var updated = await _appLogic.UpdateAccountTypeAsync(accountTypeId.Value, dto);
                 _logger.LogInformation("Account Type updated successfully: {Id}", accountTypeId.Value);
                 return Json(new { Success = true, Messages = "Account Type updated successfully!", data = updated });
             }
             else
             {
-                var created = await _service.CreateAsync(dto);
+                var created = await _appLogic.CreateAccountTypeAsync(dto);
                 _logger.LogInformation("New Account Type added successfully: {Id}", created.AccountTypeId);
                 return Json(new { Success = true, Messages = "New Account Type added successfully!", data = created });
             }
