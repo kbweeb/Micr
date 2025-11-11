@@ -6,11 +6,14 @@
 }
 
 <div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h5 class="mb-0">Operational Statuses</h5>
-            <small class="text-muted">@statuses.Count options available.</small>
+            <small class="text-muted" data-role="count" data-count="@statuses.Count">@statuses.Count options available.</small>
         </div>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#statusModal">
+            <i class="bi bi-plus-circle me-1"></i> Add New
+        </button>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -20,17 +23,23 @@
                         <th scope="col">Status</th>
                         <th scope="col">Created</th>
                         <th scope="col">Created By</th>
+                        <th scope="col" class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (statuses.Any())
                     {
-                        foreach (var status in statuses)
+                        foreach (var s in statuses)
                         {
                             <tr>
-                                <td class="fw-semibold">@status.StatusName</td>
-                                <td>@status.CreatedDate.ToString("dd MMM yyyy")</td>
-                                <td>@status.CreatedByUser?.Fullname</td>
+                                <td class="fw-semibold">@s.StatusName</td>
+                                <td>@s.CreatedDate.ToString("dd MMM yyyy")</td>
+                                <td>@s.CreatedByUser?.Fullname</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="@s.StatusId" data-name="@s.StatusName">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </button>
+                                </td>
                             </tr>
                         }
                     }
@@ -40,13 +49,138 @@
     </div>
 </div>
 
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">Add Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusForm" asp-action="CreateUpdateStatus" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div class="alert alert-danger d-none" data-role="error"></div>
+                    <input type="hidden" id="StatusId" name="statusId" />
+                    <div class="mb-3">
+                        <label for="StatusName" class="form-label">Status Name</label>
+                        <input class="form-control" type="text" id="StatusName" name="StatusName" maxlength="50" required />
+                    </div>
+                    <!-- Created, CreatedBy are DB-generated; do not expose/edit in the modal -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" data-role="save">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/duralux/vendors/js/dataTables.min.js" asp-append-version="true"></script>
     <script src="~/duralux/vendors/js/dataTables.bs5.min.js" asp-append-version="true"></script>
     <script>
         $(function () {
-            $('#statusTable').DataTable({
-                responsive: true
+            const table = $('#statusTable').DataTable({ responsive: true });
+            const modalElement = document.getElementById('statusModal');
+            const modal = new bootstrap.Modal(modalElement);
+            const form = $('#statusForm');
+            const saveButton = $('[data-role="save"]');
+            const errorBox = form.find('[data-role="error"]');
+            const countLabel = $('[data-role="count"]');
+            const maxAttempts = 3;
+
+            const resetError = () => errorBox.addClass('d-none').text('');
+            const showError = (m) => errorBox.removeClass('d-none').text(m);
+
+            const refreshTable = () => {
+                $.getJSON('/Status/GetStatusData', function (resp) {
+                    if (!resp || !(resp.Success || resp.success)) return;
+                    const rows = (resp.data || []).map(function (s) {
+                        const id = s.statusId;
+                        const name = s.statusName || '—';
+                        const created = s.created || '—';
+                        const createdBy = s.createdBy || '—';
+                        const actions = `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${id}" data-name="${name}"><i class=\"bi bi-pencil-square\"></i> Edit</button>`;
+                        return [name, created, createdBy, actions];
+                    });
+                    table.clear().rows.add(rows).draw(false);
+                    const nextCount = rows.length;
+                    countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} options available.`);
+                });
+            };
+
+            // Initial refresh to align with server
+            refreshTable();
+
+            saveButton.on('click', () => form.trigger('submit'));
+
+            // Open Add modal
+            $('[data-bs-target="#statusModal"]').on('click', function () {
+                $('#StatusId').val('');
+                $('#StatusName').val('');
+                $('#statusModalLabel').text('Add Status');
+                saveButton.text('Save');
+            });
+
+            // Open Edit modal
+            $('#statusTable').on('click', '[data-role="edit"]', function () {
+                const btn = $(this);
+                const data = btn.data();
+                $('#StatusId').val(data.id);
+                $('#StatusName').val(data.name);
+                $('#statusModalLabel').text('Edit Status');
+                saveButton.text('Update');
+                modal.show();
+            });
+
+            form.on('submit', function (event) {
+                event.preventDefault();
+                resetError();
+                const serialize = () => form.serialize();
+                saveButton.prop('disabled', true).text('Saving...');
+                let attempts = 0;
+
+                const submitRequest = () => {
+                    attempts += 1;
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: serialize(),
+                        success: function (result) {
+                            if (result?.Success || result?.success) {
+                                refreshTable();
+                                saveButton.prop('disabled', false).text('Save');
+                                form[0].reset();
+                                $('#StatusId').val('');
+                                $('#statusModalLabel').text('Add Status');
+                                saveButton.text('Save');
+                                modal.hide();
+                                return;
+                            }
+
+                            if (attempts < maxAttempts) { setTimeout(submitRequest, 700); return; }
+                            showError(result?.Messages || result?.messages || result?.Message || result?.message || 'We could not save the record. Please try again.');
+                            saveButton.prop('disabled', false).text('Save');
+                        },
+                        error: function (xhr) {
+                            if (attempts < maxAttempts) { setTimeout(submitRequest, 700); return; }
+                            const message = xhr?.responseJSON?.Messages || xhr?.responseJSON?.messages || xhr?.responseJSON?.Message || xhr?.responseJSON?.message || 'We could not save the record. Please try again.';
+                            showError(message);
+                            saveButton.prop('disabled', false).text('Save');
+                        }
+                    });
+                };
+
+                submitRequest();
+            });
+
+            modalElement.addEventListener('hidden.bs.modal', () => {
+                form[0].reset();
+                resetError();
+                saveButton.prop('disabled', false).text('Save');
+                $('#StatusId').val('');
+                $('#statusModalLabel').text('Add Status');
             });
         });
     </script>
