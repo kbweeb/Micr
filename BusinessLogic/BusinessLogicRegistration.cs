@@ -13,6 +13,7 @@ public static class BusinessLogicRegistration
         services.AddScoped<IChequeService, ChequeService>();
         services.AddScoped<IAccountTypeService, AccountTypeService>();
         services.AddScoped<IRegionService, RegionService>();
+        services.AddScoped<IApplicationLogic, ApplicationLogic>();
 
         return services;
     }

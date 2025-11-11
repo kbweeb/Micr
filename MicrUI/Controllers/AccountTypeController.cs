@@ -12,13 +12,15 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class AccountTypeController : Controller
 {
-    private readonly IAccountTypeService _service;
+    private readonly IApplicationLogic _appLogic;
     private readonly ILogger<AccountTypeController> _logger;
+    private readonly MicrDbContext _db;
 
-    public AccountTypeController(IAccountTypeService service, ILogger<AccountTypeController> logger)
+    public AccountTypeController(IApplicationLogic appLogic, ILogger<AccountTypeController> logger, MicrDbContext db)
     {
-        _service = service;
+        _appLogic = appLogic;
         _logger = logger;
+        _db = db;
     }
 
     [HttpGet]
@@ -29,7 +31,7 @@ public class AccountTypeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetAllAsync();
+        var list = await _appLogic.GetAccountTypesAsync();
         var items = list.Select(a => new AccountTypeListItem
         {
             Id = a.AccountTypeId,
@@ -42,40 +44,24 @@ public class AccountTypeController : Controller
         return View(new AccountTypeIndexViewModel { Items = items });
     }
 
-    // HTML form submit handler
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateForm(AccountTypeCreateRequest request)
+    [HttpGet]
+    public async Task<JsonResult> GetAccountTypeData()
     {
-        if (!ModelState.IsValid)
+        var list = await _appLogic.GetAccountTypesAsync();
+        var data = list.Select(a => new
         {
-            return View("Create", request);
-        }
-
-        try
-        {
-            var createdBy = await ResolveCurrentUserId();
-            var dto = new AccountTypeCreateDto
-            {
-                AccountTypeName = request.AccountTypeName,
-                Description = request.Description,
-                CreatedByUserId = createdBy
-            };
-            await _service.CreateAsync(dto);
-        }
-        catch (Exception)
-        {
-            ModelState.AddModelError(string.Empty, "We couldn't save the record. Please try again.");
-            return View("Create", request);
-        }
-
-        TempData["Message"] = "Account type created";
-        return RedirectToAction(nameof(Index));
+            accountTypeId = a.AccountTypeId,
+            accountTypeName = a.AccountTypeName,
+            description = a.Description,
+            code = a.AccountTypeCode,
+            created = a.Created
+        }).ToList();
+        return Json(new { data, Success = true });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? accountTypeId, AccountTypeCreateRequest request)
+    public async Task<JsonResult> CreateUpdateAccountType(long? accountTypeId, AccountTypeCreateRequest request)
     {
         try
         {
@@ -92,17 +78,39 @@ public class AccountTypeController : Controller
                 CreatedByUserId = createdBy
             };
 
+            // Basic duplicate/name validation mirroring legacy behavior
+            var existing = await _appLogic.GetAccountTypesAsync();
+            var normalizedName = (request.AccountTypeName ?? string.Empty).Trim().ToLowerInvariant();
+
             if (accountTypeId.HasValue && accountTypeId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(accountTypeId.Value, dto);
+                // Validate target exists
+                if (!existing.Any(a => a.AccountTypeId == accountTypeId.Value))
+                {
+                    return Json(new ResponseMessage { Success = false, Messages = "Selected Account Type was not found." });
+                }
+
+                // Validate uniqueness (exclude self)
+                if (existing.Any(a => (a.AccountTypeName ?? string.Empty).Trim().ToLowerInvariant() == normalizedName && a.AccountTypeId != accountTypeId.Value))
+                {
+                    return Json(new ResponseMessage { Success = false, Messages = "Account Type name already exists." });
+                }
+
+                await _appLogic.UpdateAccountTypeAsync(accountTypeId.Value, dto);
                 _logger.LogInformation("Account Type updated successfully: {Id}", accountTypeId.Value);
-                return Json(new { Success = true, Messages = "Account Type updated successfully!", data = updated });
+                return Json(new ResponseMessage { Success = true, Messages = "Account Type updated successfully!" });
             }
             else
             {
-                var created = await _service.CreateAsync(dto);
+                // Validate uniqueness for create
+                if (existing.Any(a => (a.AccountTypeName ?? string.Empty).Trim().ToLowerInvariant() == normalizedName))
+                {
+                    return Json(new ResponseMessage { Success = false, Messages = "Account Type name already exists." });
+                }
+
+                var created = await _appLogic.CreateAccountTypeAsync(dto);
                 _logger.LogInformation("New Account Type added successfully: {Id}", created.AccountTypeId);
-                return Json(new { Success = true, Messages = "New Account Type added successfully!", data = created });
+                return Json(new ResponseMessage { Success = true, Messages = "New Account Type added successfully!" });
             }
         }
         catch (Exception ex)
@@ -112,5 +120,26 @@ public class AccountTypeController : Controller
         }
     }
 
-    private Task<long> ResolveCurrentUserId() => Task.FromResult(1L);
+    private async Task<long> ResolveCurrentUserId()
+    {
+        // If authentication is wired, try to match by username
+        var username = User?.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            var userMatch = await _db.UserProfiles
+                .AsNoTracking()
+                .Where(u => u.Username == username)
+                .Select(u => (long?)u.UserId)
+                .FirstOrDefaultAsync();
+            if (userMatch.HasValue) return userMatch.Value;
+        }
+
+        // Fallback: use the first available user id
+        var anyUserId = await _db.UserProfiles
+            .AsNoTracking()
+            .OrderBy(u => u.UserId)
+            .Select(u => (long?)u.UserId)
+            .FirstOrDefaultAsync();
+        return anyUserId ?? 1L;
+    }
 }
