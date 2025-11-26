@@ -18,7 +18,7 @@ public class BusinessMappingProfile : Profile
             .ForMember(d => d.AccountTypeName, o => o.MapFrom(s => s.AccountTypeName))
             .ForMember(d => d.AccountTypeCode, o => o.MapFrom(s => s.AccountTypeCode))
             .ForMember(d => d.Description, o => o.MapFrom(s => s.Description))
-            .ForMember(d => d.Created, o => o.MapFrom(s => s.CreatedDate.ToLocalTime().ToString("dd MMM yyyy HH:mm")));
+            .ForMember(d => d.Created, o => o.MapFrom(s => (s.CreatedDate ?? DateTime.UtcNow).ToLocalTime().ToString("dd MMM yyyy HH:mm")));
 
         CreateMap<Domain.DTOs.RegionCreateDto, Domain.DataTables.RegionZone>();
         CreateMap<Domain.DataTables.RegionZone, Domain.DTOs.RegionDto>()
