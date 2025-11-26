@@ -1,41 +1,27 @@
 using BusinessLogic.Logic;
-using Domain.DTOs;
+using Domain.ViewModels.Regions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using MicrDbChequeProcessingSystem.Data;
-using MicrDbChequeProcessingSystem.Models;
-using MicrDbChequeProcessingSystem.ViewModels;
-using Microsoft.Extensions.Logging;
 
 namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class RegionController : Controller
 {
-    private readonly IApplicationLogic _appLogic;
+    private readonly IRegionService _service;
     private readonly ILogger<RegionController> _logger;
-    private readonly MicrDbContext _db;
 
-    public RegionController(IApplicationLogic appLogic, ILogger<RegionController> logger, MicrDbContext db)
+    public RegionController(IRegionService service, ILogger<RegionController> logger)
     {
-        _appLogic = appLogic;
+        _service = service;
         _logger = logger;
-        _db = db;
-    }
-
-    [HttpGet]
-    public IActionResult Create()
-    {
-        return View(new RegionCreateRequest());
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _appLogic.GetRegionsIndexAsync();
-        var items = list.Select(r => new RegionListItem
+        var list = await _service.GetIndexAsync();
+        var items = list.Select(r => new RegionListItemViewModel
         {
-            Id = r.RegionId,
-            Name = r.RegionName,
+            RegionId = r.RegionId,
+            RegionName = r.RegionName,
             Description = r.Description,
             Created = r.Created,
             Banks = r.Banks,
@@ -45,126 +31,32 @@ public class RegionController : Controller
         return View(new RegionIndexViewModel { Items = items });
     }
 
-    // HTML form submit handler
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateForm(RegionCreateRequest request)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View("Create", request);
-        }
-
-        try
-        {
-            var createdBy = await ResolveCurrentUserId();
-            var dto = new RegionCreateDto
-            {
-                RegionName = request.RegionName,
-                Description = request.Description,
-                CreatedByUserId = createdBy
-            };
-            await _appLogic.CreateRegionAsync(dto);
-            TempData["Message"] = "Region created";
-            return RedirectToAction(nameof(Index));
-        }
-        catch (Exception)
-        {
-            ModelState.AddModelError(string.Empty, "We couldn't save the record. Please try again.");
-            return View("Create", request);
-        }
-    }
-
-    [HttpGet]
-    public async Task<JsonResult> GetRegionData()
-    {
-        var list = await _appLogic.GetRegionsIndexAsync();
-        var data = list.Select(r => new
-        {
-            regionId = r.RegionId,
-            regionName = r.RegionName,
-            description = r.Description,
-            banks = r.Banks,
-            branches = r.Branches,
-            created = r.Created
-        }).ToList();
-        return Json(new { data, Success = true });
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdateRegion(long? regionId, RegionCreateRequest request)
+    public async Task<JsonResult> CreateUpdate(long? regionId, RegionFormViewModel request)
     {
         try
         {
             if (!ModelState.IsValid)
             {
-                return Json(new { Success = false, Messages = "Please provide the required details." });
+                return Json(new { success = false, messages = "Please provide the required details." });
             }
-
-            var createdBy = await ResolveCurrentUserId();
-            var dto = new RegionCreateDto
-            {
-                RegionName = request.RegionName,
-                Description = request.Description,
-                CreatedByUserId = createdBy
-            };
-
-            // Basic duplicate/name validation mirroring legacy behavior
-            var existing = await _appLogic.GetRegionsIndexAsync();
-            var normalizedName = (request.RegionName ?? string.Empty).Trim().ToLowerInvariant();
 
             if (regionId.HasValue && regionId.Value > 0)
             {
-                if (!existing.Any(r => r.RegionId == regionId.Value))
-                {
-                    return Json(new ResponseMessage { Success = false, Messages = "Selected Region was not found." });
-                }
-
-                if (existing.Any(r => (r.RegionName ?? string.Empty).Trim().ToLowerInvariant() == normalizedName && r.RegionId != regionId.Value))
-                {
-                    return Json(new ResponseMessage { Success = false, Messages = "Region name already exists." });
-                }
-
-                await _appLogic.UpdateRegionAsync(regionId.Value, dto);
-                _logger.LogInformation("Region updated successfully: {Id}", regionId.Value);
-                return Json(new ResponseMessage { Success = true, Messages = "Region updated successfully!" });
+                var updated = await _service.UpdateAsync(regionId.Value, request);
+                _logger.LogInformation("Region updated: {Id}", regionId.Value);
+                return Json(new { success = true, messages = "Region updated successfully!", data = updated });
             }
 
-            if (existing.Any(r => (r.RegionName ?? string.Empty).Trim().ToLowerInvariant() == normalizedName))
-            {
-                return Json(new ResponseMessage { Success = false, Messages = "Region name already exists." });
-            }
-
-            var created = await _appLogic.CreateRegionAsync(dto);
-            _logger.LogInformation("New Region added successfully: {Id}", created.RegionId);
-            return Json(new ResponseMessage { Success = true, Messages = "New Region added successfully!" });
+            var created = await _service.CreateAsync(request);
+            _logger.LogInformation("Region created: {Id}", created.RegionId);
+            return Json(new { success = true, messages = "New region added successfully!", data = created });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding/updating Region");
-            return Json(new { Success = false, Messages = "We couldn't save the record. Please try again." });
+            _logger.LogError(ex, "Error saving region");
+            return Json(new { success = false, messages = $"Error: {ex.Message}" });
         }
-    }
-
-    private async Task<long> ResolveCurrentUserId()
-    {
-        var username = User?.Identity?.Name;
-        if (!string.IsNullOrWhiteSpace(username))
-        {
-            var userMatch = await _db.UserProfiles
-                .AsNoTracking()
-                .Where(u => u.Username == username)
-                .Select(u => (long?)u.UserId)
-                .FirstOrDefaultAsync();
-            if (userMatch.HasValue) return userMatch.Value;
-        }
-
-        var anyUserId = await _db.UserProfiles
-            .AsNoTracking()
-            .OrderBy(u => u.UserId)
-            .Select(u => (long?)u.UserId)
-            .FirstOrDefaultAsync();
-        return anyUserId ?? 1L;
     }
 }

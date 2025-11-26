@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\BusinessLogic\\BusinessLogic.csproj": {}
+    "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\BusinessLogic.csproj": {}
   },
   "projects": {
-    "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\BusinessLogic\\BusinessLogic.csproj": {
+    "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\BusinessLogic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\BusinessLogic\\BusinessLogic.csproj",
+        "projectUniqueName": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\BusinessLogic.csproj",
         "projectName": "BusinessLogic",
-        "projectPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\BusinessLogic\\BusinessLogic.csproj",
-        "packagesPath": "C:\\Users\\amoon\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\BusinessLogic\\obj\\",
+        "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\BusinessLogic.csproj",
+        "packagesPath": "C:\\Users\\ednaa\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\amoon\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ednaa\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,18 +26,20 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\DataAccess\\DataAccess.csproj": {
-                "projectPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\DataAccess\\DataAccess.csproj"
+              "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccessLogic\\DataAccessLogic.csproj": {
+                "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccessLogic\\DataAccessLogic.csproj"
               },
-              "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\Domain\\Domain.csproj": {
-                "projectPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\Domain\\Domain.csproj"
+              "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccess\\DataAccess.csproj": {
+                "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccess\\DataAccess.csproj"
+              },
+              "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\Domain.csproj": {
+                "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\Domain.csproj"
               }
             }
           }
@@ -57,6 +59,16 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[12.0.1, )"
+            },
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[11.9.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -73,24 +85,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\DataAccess\\DataAccess.csproj": {
+    "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccessLogic\\DataAccessLogic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\DataAccess\\DataAccess.csproj",
-        "projectName": "DataAccess",
-        "projectPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\DataAccess\\DataAccess.csproj",
-        "packagesPath": "C:\\Users\\amoon\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\DataAccess\\obj\\",
+        "projectUniqueName": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccessLogic\\DataAccessLogic.csproj",
+        "projectName": "DataAccessLogic",
+        "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccessLogic\\DataAccessLogic.csproj",
+        "packagesPath": "C:\\Users\\ednaa\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccessLogic\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\amoon\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ednaa\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -99,17 +111,102 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\Domain\\Domain.csproj": {
-                "projectPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\Domain\\Domain.csproj"
+              "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccess\\DataAccess.csproj": {
+                "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccess\\DataAccess.csproj"
+              },
+              "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\Domain.csproj": {
+                "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\Domain.csproj"
               }
             }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[12.0.1, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccess\\DataAccess.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccess\\DataAccess.csproj",
+        "projectName": "DataAccess",
+        "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccess\\DataAccess.csproj",
+        "packagesPath": "C:\\Users\\ednaa\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccess\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\ednaa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
           }
         },
         "warningProperties": {
@@ -159,24 +256,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\Domain\\Domain.csproj": {
+    "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\Domain\\Domain.csproj",
+        "projectUniqueName": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\Domain.csproj",
         "projectName": "Domain",
-        "projectPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\Domain\\Domain.csproj",
-        "packagesPath": "C:\\Users\\amoon\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\Domain\\obj\\",
+        "projectPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\Domain.csproj",
+        "packagesPath": "C:\\Users\\ednaa\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\amoon\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ednaa\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -185,7 +282,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -225,7 +321,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

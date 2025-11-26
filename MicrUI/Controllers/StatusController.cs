@@ -1,135 +1,60 @@
+using BusinessLogic.Logic;
+using Domain.ViewModels.Statuses;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MicrDbChequeProcessingSystem.Data;
-using MicrDbChequeProcessingSystem.Models;
-using MicrDbChequeProcessingSystem.ViewModels;
-using Domain.DTOs;
 
 namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class StatusController : Controller
 {
-    private readonly MicrDbContext _context;
+    private readonly IStatusService _service;
+    private readonly ILogger<StatusController> _logger;
 
-    public StatusController(MicrDbContext context)
+    public StatusController(IStatusService service, ILogger<StatusController> logger)
     {
-        _context = context;
+        _service = service;
+        _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var statuses = await _context.Statuses
-            .Include(s => s.CreatedByUser)
-            .AsNoTracking()
-            .OrderBy(s => s.StatusName)
-            .ToListAsync();
+        var list = await _service.GetIndexAsync();
+        var items = list.Select(s => new StatusListItemViewModel
+        {
+            StatusId = s.StatusId,
+            StatusName = s.StatusName,
+            Created = s.Created,
+            CreatedBy = s.CreatedBy
+        }).ToList();
 
-        return View(statuses);
-    }
-
-    [HttpGet]
-    public async Task<JsonResult> GetStatusData()
-    {
-        var list = await _context.Statuses
-            .Include(s => s.CreatedByUser)
-            .AsNoTracking()
-            .OrderBy(s => s.StatusName)
-            .Select(s => new
-            {
-                statusId = s.StatusId,
-                statusName = s.StatusName,
-                created = s.CreatedDate.ToLocalTime().ToString("dd MMM yyyy"),
-                createdBy = s.CreatedByUser.Fullname
-            })
-            .ToListAsync();
-
-        return Json(new { data = list, Success = true });
+        return View(new StatusIndexViewModel { Items = items });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdateStatus(long? statusId, StatusCreateRequest request)
+    public async Task<JsonResult> CreateUpdate(long? statusId, StatusFormViewModel request)
     {
         try
         {
             if (!ModelState.IsValid)
             {
-                return Json(new ResponseMessage { Success = false, Messages = "Please provide the required details." });
+                return Json(new { success = false, messages = "Please provide the required details." });
             }
-
-            var normalized = (request.StatusName ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(normalized))
-            {
-                return Json(new ResponseMessage { Success = false, Messages = "Status name is required." });
-            }
-
-            // Duplicate check (case-insensitive)
-            var exists = await _context.Statuses
-                .AsNoTracking()
-                .Where(s => s.StatusName.ToLower() == normalized.ToLower())
-                .ToListAsync();
 
             if (statusId.HasValue && statusId.Value > 0)
             {
-                var target = await _context.Statuses.FindAsync(statusId.Value);
-                if (target == null)
-                {
-                    return Json(new ResponseMessage { Success = false, Messages = "Selected Status was not found." });
-                }
-
-                if (exists.Any(s => s.StatusId != statusId.Value))
-                {
-                    return Json(new ResponseMessage { Success = false, Messages = "Status name already exists." });
-                }
-
-                target.StatusName = normalized;
-                await _context.SaveChangesAsync();
-                return Json(new ResponseMessage { Success = true, Messages = "Status updated successfully!" });
+                var updated = await _service.UpdateAsync(statusId.Value, request);
+                _logger.LogInformation("Status updated: {Id}", statusId.Value);
+                return Json(new { success = true, messages = "Status updated successfully!", data = updated });
             }
-            else
-            {
-                if (exists.Any())
-                {
-                    return Json(new ResponseMessage { Success = false, Messages = "Status name already exists." });
-                }
 
-                var createdBy = await ResolveCurrentUserId();
-                var entity = new Status
-                {
-                    StatusName = normalized,
-                    CreatedByUserId = createdBy,
-                    CreatedDate = DateTime.UtcNow
-                };
-
-                _context.Statuses.Add(entity);
-                await _context.SaveChangesAsync();
-                return Json(new ResponseMessage { Success = true, Messages = "New Status added successfully!" });
-            }
+            var created = await _service.CreateAsync(request);
+            _logger.LogInformation("Status created: {Id}", created.StatusId);
+            return Json(new { success = true, messages = "New status added successfully!", data = created });
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return Json(new ResponseMessage { Success = false, Messages = "We couldn't save the record. Please try again." });
+            _logger.LogError(ex, "Error saving status");
+            return Json(new { success = false, messages = $"Error: {ex.Message}" });
         }
-    }
-
-    private async Task<long> ResolveCurrentUserId()
-    {
-        var username = User?.Identity?.Name;
-        if (!string.IsNullOrWhiteSpace(username))
-        {
-            var userMatch = await _context.UserProfiles
-                .AsNoTracking()
-                .Where(u => u.Username == username)
-                .Select(u => (long?)u.UserId)
-                .FirstOrDefaultAsync();
-            if (userMatch.HasValue) return userMatch.Value;
-        }
-
-        var anyUserId = await _context.UserProfiles
-            .AsNoTracking()
-            .OrderBy(u => u.UserId)
-            .Select(u => (long?)u.UserId)
-            .FirstOrDefaultAsync();
-        return anyUserId ?? 1L;
     }
 }

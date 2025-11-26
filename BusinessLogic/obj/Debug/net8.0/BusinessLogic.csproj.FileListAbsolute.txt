@@ -1,9 +1,7 @@
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\BusinessLogic.deps.json
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\BusinessLogic.dll
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\BusinessLogic.pdb
-C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\DataAccess.dll
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\Domain.dll
-C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\DataAccess.pdb
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\Domain.pdb
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\obj\Debug\net8.0\BusinessLogic.csproj.AssemblyReference.cache
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\obj\Debug\net8.0\BusinessLogic.GeneratedMSBuildEditorConfig.editorconfig
@@ -16,3 +14,7 @@ C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\obj\Debug\net8.0\BusinessLo
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\obj\Debug\net8.0\refint\BusinessLogic.dll
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\obj\Debug\net8.0\BusinessLogic.pdb
 C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\obj\Debug\net8.0\ref\BusinessLogic.dll
+C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\DataAccessLogic.dll
+C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\DataAccessLogic.pdb
+C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\DataAccess.dll
+C:\Users\ednaa\Desktop\New folder\Micr\BusinessLogic\bin\Debug\net8.0\DataAccess.pdb

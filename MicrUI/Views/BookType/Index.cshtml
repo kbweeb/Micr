@@ -1,45 +1,115 @@
-@model IEnumerable<MicrDbChequeProcessingSystem.Models.BookType>
-
+@model Domain.ViewModels.BookTypes.BookTypeIndexViewModel
 @{
-    var bookTypes = Model?.ToList() ?? new List<MicrDbChequeProcessingSystem.Models.BookType>();
     ViewData["Title"] = "Cheque Books";
+    var items = Model?.Items ?? new List<Domain.ViewModels.BookTypes.BookTypeListItemViewModel>();
+    var accountTypes = ViewBag.AccountTypes as List<Domain.ViewModels.AccountTypes.AccountTypeDto> ?? new List<Domain.ViewModels.AccountTypes.AccountTypeDto>();
+    var leaflets = ViewBag.Leaflets as List<Domain.ViewModels.NumberOfLeaflets.NumberOfLeafletDto> ?? new List<Domain.ViewModels.NumberOfLeaflets.NumberOfLeafletDto>();
+    var transactionCodes = ViewBag.TransactionCodes as List<Domain.ViewModels.TransactionCodes.TransactionCodeDto> ?? new List<Domain.ViewModels.TransactionCodes.TransactionCodeDto>();
 }
 
 <div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h5 class="mb-0">Cheque Book Types</h5>
-            <small class="text-muted">@bookTypes.Count entries available.</small>
+            <small class="text-muted" data-role="count">@items.Count entries available.</small>
         </div>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#formModal" data-mode="add">
+            <i class="bi bi-plus-circle me-1"></i> Add New
+        </button>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="bookTypeTable">
+            <table class="table table-hover align-middle" id="dataTable">
                 <thead class="table-light">
                     <tr>
-                        <th scope="col">Code</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Account Type</th>
-                        <th scope="col">Leaflets</th>
-                        <th scope="col">Transaction Code</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Account Type</th>
+                        <th>Leaflets</th>
+                        <th>Transaction Code</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (bookTypes.Any())
+                    @foreach (var item in items)
                     {
-                        foreach (var bookType in bookTypes)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@bookType.BookTypeCode</td>
-                                <td>@bookType.BookTypeName</td>
-                                <td>@bookType.AccountType?.AccountTypeName</td>
-                                <td>@bookType.NumberOfLeaflet?.NumberOfLeaflet1</td>
-                                <td>@bookType.TransactionCode?.Code</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td class="fw-semibold">@item.BookTypeCode</td>
+                            <td>@item.BookTypeName</td>
+                            <td>@item.AccountTypeName</td>
+                            <td>@item.NumberOfLeaflet</td>
+                            <td>@item.TransactionCode</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#formModal"
+                                        data-mode="edit" data-id="@item.BookTypeId" data-code="@item.BookTypeCode" data-name="@item.BookTypeName"
+                                        data-accounttypeid="@item.AccountTypeId" data-leafletid="@item.NumberOfLeafletId" data-transactioncodeid="@item.TransactionCodeId">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="formModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Book Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dataForm" asp-action="CreateUpdate" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="alert alert-danger d-none" data-role="error"></div>
+                    <input type="hidden" id="itemId" name="bookTypeId" />
+                    <div class="mb-3">
+                        <label for="BookTypeCode" class="form-label">Code <span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" id="BookTypeCode" name="BookTypeCode" maxlength="20" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BookTypeName" class="form-label">Name <span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" id="BookTypeName" name="BookTypeName" maxlength="100" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="AccountTypeId" class="form-label">Account Type <span class="text-danger">*</span></label>
+                        <select class="form-select" id="AccountTypeId" name="AccountTypeId" required>
+                            <option value="">Select Account Type</option>
+                            @foreach (var a in accountTypes)
+                            {
+                                <option value="@a.AccountTypeId">@a.AccountTypeName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="NumberOfLeafletId" class="form-label">Number of Leaflets <span class="text-danger">*</span></label>
+                        <select class="form-select" id="NumberOfLeafletId" name="NumberOfLeafletId" required>
+                            <option value="">Select Leaflets</option>
+                            @foreach (var l in leaflets)
+                            {
+                                <option value="@l.NumberOfLeafletId">@l.NumberOfLeaflet</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="TransactionCodeId" class="form-label">Transaction Code <span class="text-danger">*</span></label>
+                        <select class="form-select" id="TransactionCodeId" name="TransactionCodeId" required>
+                            <option value="">Select Transaction Code</option>
+                            @foreach (var t in transactionCodes)
+                            {
+                                <option value="@t.TransactionCodeId">@t.Code</option>
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" data-role="save">Save</button>
+            </div>
         </div>
     </div>
 </div>
@@ -49,9 +119,64 @@
     <script src="~/duralux/vendors/js/dataTables.bs5.min.js" asp-append-version="true"></script>
     <script>
         $(function () {
-            $('#bookTypeTable').DataTable({
-                responsive: true
+            const table = $('#dataTable').DataTable({ responsive: true });
+            const modalEl = document.getElementById('formModal');
+            const form = $('#dataForm');
+            const saveBtn = $('[data-role="save"]');
+            const errorBox = form.find('[data-role="error"]');
+
+            const resetForm = () => {
+                form[0].reset();
+                $('#itemId').val('');
+                errorBox.addClass('d-none').text('');
+                saveBtn.prop('disabled', false).text('Save');
+            };
+
+            $('#formModal').on('show.bs.modal', function (e) {
+                const btn = $(e.relatedTarget);
+                const mode = btn.data('mode');
+                resetForm();
+                if (mode === 'edit') {
+                    $('.modal-title').text('Edit Book Type');
+                    $('#itemId').val(btn.data('id'));
+                    $('#BookTypeCode').val(btn.data('code'));
+                    $('#BookTypeName').val(btn.data('name'));
+                    $('#AccountTypeId').val(btn.data('accounttypeid'));
+                    $('#NumberOfLeafletId').val(btn.data('leafletid'));
+                    $('#TransactionCodeId').val(btn.data('transactioncodeid'));
+                    saveBtn.text('Update');
+                } else {
+                    $('.modal-title').text('Add Book Type');
+                }
             });
+
+            saveBtn.on('click', () => form.trigger('submit'));
+
+            form.on('submit', function (e) {
+                e.preventDefault();
+                errorBox.addClass('d-none');
+                saveBtn.prop('disabled', true).text('Saving...');
+
+                $.ajax({
+                    url: '@Url.Action("CreateUpdate", "BookType")',
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function (res) {
+                        if (res.success) {
+                            location.reload();
+                        } else {
+                            errorBox.removeClass('d-none').text(res.messages || 'Error saving record.');
+                            saveBtn.prop('disabled', false).text('Save');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        errorBox.removeClass('d-none').text('Server error: ' + (xhr.responseText || error));
+                        saveBtn.prop('disabled', false).text('Save');
+                    }
+                });
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', resetForm);
         });
     </script>
 }

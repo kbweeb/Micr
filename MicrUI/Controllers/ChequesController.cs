@@ -1,38 +1,24 @@
-using BusinessLogic.Logic;
-using Domain.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class ChequesController : Controller
 {
-    private readonly IChequeService _chequeService;
-
-    public ChequesController(IChequeService chequeService)
+    public ChequesController()
     {
-        _chequeService = chequeService;
     }
 
     [HttpGet]
     public IActionResult Create()
     {
-        return View(new ChequeDto());
+        return View();
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(ChequeDto model, CancellationToken ct)
+    public IActionResult Create(object model)
     {
-        if (string.IsNullOrWhiteSpace(model.Number))
-        {
-            ModelState.AddModelError(nameof(model.Number), "Number is required");
-        }
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
-
-        await _chequeService.CreateAsync(model, ct);
+        // TODO: Implement cheque creation
         TempData["Message"] = "Cheque saved";
         return RedirectToAction("Index", "Home");
     }

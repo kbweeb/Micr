@@ -1,61 +1,90 @@
-using AutoMapper;
-using DataAccessLogic;
-using Domain.DataTables;
-using Domain.DTOs;
+using Domain.ViewModels.Regions;
 using Microsoft.EntityFrameworkCore;
+using MicrDbChequeProcessingSystem.Data;
 
 namespace BusinessLogic.Logic;
 
 public interface IRegionService
 {
-    Task<List<RegionIndexDto>> GetIndexAsync(CancellationToken ct = default);
-    Task<RegionDto> CreateAsync(RegionCreateDto dto, CancellationToken ct = default);
-    Task<RegionDto> UpdateAsync(long regionId, RegionCreateDto dto, CancellationToken ct = default);
+    Task<List<RegionDto>> GetIndexAsync(CancellationToken ct = default);
+    Task<RegionDto> CreateAsync(RegionFormViewModel form, CancellationToken ct = default);
+    Task<RegionDto> UpdateAsync(long regionId, RegionFormViewModel form, CancellationToken ct = default);
 }
 
 public class RegionService : IRegionService
 {
-    private readonly IGenericDataAccess<RegionZone> _repo;
-    private readonly IMapper _mapper;
+    private readonly MicrDbContext _context;
 
-    public RegionService(IGenericDataAccess<RegionZone> repo, IMapper mapper)
+    public RegionService(MicrDbContext context)
     {
-        _repo = repo;
-        _mapper = mapper;
+        _context = context;
     }
 
-    public async Task<List<RegionIndexDto>> GetIndexAsync(CancellationToken ct = default)
+    public async Task<List<RegionDto>> GetIndexAsync(CancellationToken ct = default)
     {
-        var query = _repo.Queryable
-            .Select(r => new RegionIndexDto
-            {
-                RegionId = r.RegionId,
-                RegionName = r.RegionName,
-                Description = r.Description,
-                Created = (r.CreatedDate ?? DateTime.MinValue).ToLocalTime().ToString("dd MMM yyyy"),
-                Banks = r.Banks.Count,
-                Branches = r.Banks.SelectMany(b => b.BankBranches).Count()
-            })
-            .OrderBy(r => r.RegionName);
+        var regions = await _context.RegionZones
+            .Include(r => r.Banks)
+                .ThenInclude(b => b.BankBranches)
+            .AsNoTracking()
+            .OrderBy(r => r.RegionName)
+            .ToListAsync(ct);
 
-        return await query.ToListAsync(ct);
+        return regions.Select(r => new RegionDto
+        {
+            RegionId = r.RegionId,
+            RegionName = r.RegionName,
+            Description = r.Description,
+            Created = (r.CreatedDate ?? DateTime.MinValue).ToString("dd MMM yyyy"),
+            Banks = r.Banks.Count,
+            Branches = r.Banks.Sum(b => b.BankBranches.Count)
+        }).ToList();
     }
 
-    public async Task<RegionDto> CreateAsync(RegionCreateDto dto, CancellationToken ct = default)
+    public async Task<RegionDto> CreateAsync(RegionFormViewModel form, CancellationToken ct = default)
     {
-        var entity = _mapper.Map<RegionZone>(dto);
-        entity.RegionName = (dto.RegionName ?? string.Empty).Trim();
-        entity.CreatedDate = DateTime.UtcNow;
-        await _repo.AddAsync(entity, ct);
-        return _mapper.Map<RegionDto>(entity);
+        var entity = new MicrDbChequeProcessingSystem.Models.RegionZone
+        {
+            RegionName = form.RegionName.Trim(),
+            Description = form.Description?.Trim(),
+            CreatedByUserId = form.CreatedByUserId,
+            CreatedDate = DateTime.UtcNow
+        };
+
+        _context.RegionZones.Add(entity);
+        await _context.SaveChangesAsync(ct);
+
+        return new RegionDto
+        {
+            RegionId = entity.RegionId,
+            RegionName = entity.RegionName,
+            Description = entity.Description,
+            Created = entity.CreatedDate?.ToString("dd MMM yyyy") ?? "",
+            Banks = 0,
+            Branches = 0
+        };
     }
 
-    public async Task<RegionDto> UpdateAsync(long regionId, RegionCreateDto dto, CancellationToken ct = default)
+    public async Task<RegionDto> UpdateAsync(long regionId, RegionFormViewModel form, CancellationToken ct = default)
     {
-        var entity = await _repo.GetByIdAsync(regionId, ct) ?? throw new KeyNotFoundException("Region not found");
-        entity.RegionName = (dto.RegionName ?? string.Empty).Trim();
-        entity.Description = dto.Description;
-        await _repo.UpdateAsync(entity, ct);
-        return _mapper.Map<RegionDto>(entity);
+        var entity = await _context.RegionZones
+            .Include(r => r.Banks)
+                .ThenInclude(b => b.BankBranches)
+            .FirstOrDefaultAsync(r => r.RegionId == regionId, ct)
+            ?? throw new InvalidOperationException("Region not found");
+
+        entity.RegionName = form.RegionName.Trim();
+        entity.Description = form.Description?.Trim();
+
+        await _context.SaveChangesAsync(ct);
+
+        return new RegionDto
+        {
+            RegionId = entity.RegionId,
+            RegionName = entity.RegionName,
+            Description = entity.Description,
+            Created = entity.CreatedDate?.ToString("dd MMM yyyy") ?? "",
+            Banks = entity.Banks.Count,
+            Branches = entity.Banks.Sum(b => b.BankBranches.Count)
+        };
     }
 }

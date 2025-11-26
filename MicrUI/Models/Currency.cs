@@ -13,6 +13,8 @@ public partial class Currency
 
     public string? Symbol { get; set; }
 
+    public string? Description { get; set; }
+
     public bool IsActive { get; set; }
 
     public long CreatedByUserId { get; set; }

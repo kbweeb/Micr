@@ -1,52 +1,100 @@
-@model IEnumerable<MicrDbChequeProcessingSystem.Models.BankBranch>
-
+@model Domain.ViewModels.BankBranches.BankBranchIndexViewModel
 @{
-    var branches = Model?.ToList() ?? new List<MicrDbChequeProcessingSystem.Models.BankBranch>();
     ViewData["Title"] = "Bank Branches";
+    var items = Model?.Items ?? new List<Domain.ViewModels.BankBranches.BankBranchListItemViewModel>();
+    var banks = ViewBag.Banks as List<Domain.ViewModels.Banks.BankDto> ?? new List<Domain.ViewModels.Banks.BankDto>();
 }
 
 <div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h5 class="mb-0">Bank Branch Directory</h5>
-            <small class="text-muted">@branches.Count branch records are available.</small>
+            <small class="text-muted" data-role="count">@items.Count branch records.</small>
         </div>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#formModal" data-mode="add">
+            <i class="bi bi-plus-circle me-1"></i> Add New
+        </button>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="bankBranchTable">
+            <table class="table table-hover align-middle" id="dataTable">
                 <thead class="table-light">
                     <tr>
-                        <th scope="col">Branch</th>
-                        <th scope="col">Parent Bank</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Created</th>
+                        <th>Branch</th>
+                        <th>Parent Bank</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (branches.Any())
+                    @foreach (var item in items)
                     {
-                        foreach (var branch in branches)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@branch.BankBranchName</td>
-                                <td>@branch.Bank?.BankName</td>
-                                <td>
-                                    @if (branch.IsEnabled)
-                                    {
-                                        <span class="badge bg-success-subtle text-success">Enabled</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary-subtle text-secondary">Disabled</span>
-                                    }
-                                </td>
-                                <td>@(branch.CreatedDate?.ToString("dd MMM yyyy") ?? "—")</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td class="fw-semibold">@item.BankBranchName</td>
+                            <td>@item.BankName</td>
+                            <td>
+                                @if (item.IsEnabled)
+                                {
+                                    <span class="badge bg-success-subtle text-success">Enabled</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary">Disabled</span>
+                                }
+                            </td>
+                            <td>@item.Created</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#formModal"
+                                        data-mode="edit" data-id="@item.BankBranchId" data-name="@item.BankBranchName" 
+                                        data-bankid="@item.BankId" data-enabled="@item.IsEnabled.ToString().ToLower()">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="formModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Bank Branch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dataForm" asp-action="CreateUpdate" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="alert alert-danger d-none" data-role="error"></div>
+                    <input type="hidden" id="itemId" name="bankBranchId" />
+                    <div class="mb-3">
+                        <label for="BankBranchName" class="form-label">Branch Name <span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" id="BankBranchName" name="BankBranchName" maxlength="150" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BankId" class="form-label">Parent Bank <span class="text-danger">*</span></label>
+                        <select class="form-select" id="BankId" name="BankId" required>
+                            <option value="">Select Bank</option>
+                            @foreach (var b in banks)
+                            {
+                                <option value="@b.BankId">@b.BankName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="IsEnabled" name="IsEnabled" value="true" checked />
+                        <label class="form-check-label" for="IsEnabled">Enabled</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" data-role="save">Save</button>
+            </div>
         </div>
     </div>
 </div>
@@ -56,9 +104,63 @@
     <script src="~/duralux/vendors/js/dataTables.bs5.min.js" asp-append-version="true"></script>
     <script>
         $(function () {
-            $('#bankBranchTable').DataTable({
-                responsive: true
+            const table = $('#dataTable').DataTable({ responsive: true });
+            const modalEl = document.getElementById('formModal');
+            const form = $('#dataForm');
+            const saveBtn = $('[data-role="save"]');
+            const errorBox = form.find('[data-role="error"]');
+
+            const resetForm = () => {
+                form[0].reset();
+                $('#itemId').val('');
+                $('#IsEnabled').prop('checked', true);
+                errorBox.addClass('d-none').text('');
+                saveBtn.prop('disabled', false).text('Save');
+            };
+
+            $('#formModal').on('show.bs.modal', function (e) {
+                const btn = $(e.relatedTarget);
+                const mode = btn.data('mode');
+                resetForm();
+                if (mode === 'edit') {
+                    $('.modal-title').text('Edit Bank Branch');
+                    $('#itemId').val(btn.data('id'));
+                    $('#BankBranchName').val(btn.data('name'));
+                    $('#BankId').val(btn.data('bankid'));
+                    $('#IsEnabled').prop('checked', btn.data('enabled') === true || btn.data('enabled') === 'true');
+                    saveBtn.text('Update');
+                } else {
+                    $('.modal-title').text('Add Bank Branch');
+                }
             });
+
+            saveBtn.on('click', () => form.trigger('submit'));
+
+            form.on('submit', function (e) {
+                e.preventDefault();
+                errorBox.addClass('d-none');
+                saveBtn.prop('disabled', true).text('Saving...');
+
+                $.ajax({
+                    url: '@Url.Action("CreateUpdate", "BankBranch")',
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function (res) {
+                        if (res.success) {
+                            location.reload();
+                        } else {
+                            errorBox.removeClass('d-none').text(res.messages || 'Error saving record.');
+                            saveBtn.prop('disabled', false).text('Save');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        errorBox.removeClass('d-none').text('Server error: ' + (xhr.responseText || error));
+                        saveBtn.prop('disabled', false).text('Save');
+                    }
+                });
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', resetForm);
         });
     </script>
 }

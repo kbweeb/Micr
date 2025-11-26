@@ -1,50 +1,47 @@
-@model MicrDbChequeProcessingSystem.ViewModels.AccountTypeIndexViewModel
+@model Domain.ViewModels.AccountTypes.AccountTypeIndexViewModel
 
 @{
     ViewData["Title"] = "Account Types";
-    var items = Model?.Items ?? new List<MicrDbChequeProcessingSystem.ViewModels.AccountTypeListItem>();
+    var items = Model?.Items ?? new List<Domain.ViewModels.AccountTypes.AccountTypeListItemViewModel>();
 }
 
 <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h5 class="mb-0">Account Type Catalog</h5>
-            <small class="text-muted" data-role="count" data-count="@items.Count">@items.Count records available.</small>
+            <small class="text-muted" data-role="count">@items.Count records available.</small>
         </div>
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createAccountTypeModal">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#formModal" data-mode="add">
             <i class="bi bi-plus-circle me-1"></i> Add New
         </button>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover" id="accountTypeTable">
+            <table class="table table-hover align-middle" id="dataTable">
                 <thead class="table-light">
                     <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Code</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Created</th>
-                        <th scope="col" class="text-end">Actions</th>
+                        <th>Name</th>
+                        <th>Code</th>
+                        <th>Description</th>
+                        <th>Created</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (items.Any())
+                    @foreach (var item in items)
                     {
-                        foreach (var item in items)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@item.Name</td>
-                                <td>@(string.IsNullOrWhiteSpace(item.Code) ? "—" : item.Code)</td>
-                                <td>@(string.IsNullOrWhiteSpace(item.Description) ? "—" : item.Description)</td>
-                                <td>@item.Created</td>
-                                <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="@item.Id" data-name="@item.Name" data-description="@item.Description">
-                                        <i class="bi bi-pencil-square"></i>
-                                        Edit
-                                    </button>
-                                </td>
-                            </tr>
-                        }
+                        <tr>
+                            <td class="fw-semibold">@item.AccountTypeName</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.AccountTypeCode) ? "—" : item.AccountTypeCode)</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.Description) ? "—" : item.Description)</td>
+                            <td>@item.Created</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#formModal"
+                                        data-mode="edit" data-id="@item.AccountTypeId" data-name="@item.AccountTypeName" data-description="@item.Description">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
@@ -52,25 +49,25 @@
     </div>
 </div>
 
-<div class="modal fade" id="createAccountTypeModal" tabindex="-1" aria-labelledby="createAccountTypeModalLabel" aria-hidden="true">
+<div class="modal fade" id="formModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="createAccountTypeModalLabel">Add Account Type</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Add Account Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="createAccountTypeForm" asp-action="CreateUpdateAccountType" method="post" novalidate>
+                <form id="dataForm" asp-action="CreateUpdate" method="post">
                     @Html.AntiForgeryToken()
                     <div class="alert alert-danger d-none" data-role="error"></div>
-                    <input type="hidden" id="AccountTypeId" name="accountTypeId" />
+                    <input type="hidden" id="itemId" name="accountTypeId" />
                     <div class="mb-3">
-                        <label for="AccountTypeName" class="form-label">Account Type Name</label>
+                        <label for="AccountTypeName" class="form-label">Account Type Name <span class="text-danger">*</span></label>
                         <input class="form-control" type="text" id="AccountTypeName" name="AccountTypeName" maxlength="150" required />
                     </div>
                     <div class="mb-3">
                         <label for="Description" class="form-label">Description</label>
-                        <textarea class="form-control" id="Description" name="Description" rows="3" maxlength="400" placeholder="Optional details"></textarea>
+                        <textarea class="form-control" id="Description" name="Description" rows="3" maxlength="400"></textarea>
                     </div>
                 </form>
             </div>
@@ -87,129 +84,62 @@
     <script src="~/duralux/vendors/js/dataTables.bs5.min.js" asp-append-version="true"></script>
     <script>
         $(function () {
-            const table = $('#accountTypeTable').DataTable({ responsive: true });
-
-            const modalElement = document.getElementById('createAccountTypeModal');
-            const modal = new bootstrap.Modal(modalElement);
-            const form = $('#createAccountTypeForm');
-            const saveButton = $('[data-role="save"]');
+            const table = $('#dataTable').DataTable({ responsive: true });
+            const modalEl = document.getElementById('formModal');
+            const modal = new bootstrap.Modal(modalEl);
+            const form = $('#dataForm');
+            const saveBtn = $('[data-role="save"]');
             const errorBox = form.find('[data-role="error"]');
-            const countLabel = $('[data-role="count"]');
-            const maxAttempts = 3;
-            let editingRow = null;
 
-            const resetError = () => {
-                errorBox.addClass('d-none').text('');
-            };
-
-            const showError = (message) => {
-                errorBox.removeClass('d-none').text(message);
-            };
-
-            const refreshTable = () => {
-                $.getJSON('/AccountType/GetAccountTypeData', function (resp) {
-                    if (!resp || !(resp.Success || resp.success)) return;
-                    const rows = (resp.data || []).map(function (a) {
-                        const id = a.accountTypeId;
-                        const name = a.accountTypeName || '—';
-                        const code = a.code || '—';
-                        const desc = a.description || '—';
-                        const created = a.created || '—';
-                        const actions = `<button type="button" class="btn btn-sm btn-primary" data-role="edit" data-id="${id}" data-name="${name}" data-description="${desc}"><i class="bi bi-pencil-square"></i> Edit</button>`;
-                        return [name, code, desc, created, actions];
-                    });
-                    table.clear().rows.add(rows).draw(false);
-                    const nextCount = rows.length;
-                    countLabel.data('count', nextCount).attr('data-count', nextCount).text(`${nextCount} records available.`);
-                });
-            };
-
-            refreshTable();
-
-            saveButton.on('click', () => form.trigger('submit'));
-
-            // When opening the Add modal explicitly, reset mode to create
-            $('[data-bs-target="#createAccountTypeModal"]').on('click', function () {
-                $('#AccountTypeId').val('');
-                $('#AccountTypeName').val('');
-                $('#Description').val('');
-                $('#createAccountTypeModalLabel').text('Add Account Type');
-                saveButton.text('Save');
-            });
-
-            // Open modal prefilled for edit
-            $('#accountTypeTable').on('click', '[data-role="edit"]', function () {
-                const btn = $(this);
-                editingRow = table.row(btn.closest('tr'));
-                const data = btn.data();
-                $('#AccountTypeId').val(data.id);
-                $('#AccountTypeName').val(data.name);
-                $('#Description').val(data.description || '');
-                $('#createAccountTypeModalLabel').text('Edit Account Type');
-                saveButton.text('Update');
-                modal.show();
-            });
-
-            form.on('submit', function (event) {
-                event.preventDefault();
-                resetError();
-
-                const serialize = () => form.serialize();
-                saveButton.prop('disabled', true).text('Saving...');
-                let attempts = 0;
-
-                const submitRequest = () => {
-                    attempts += 1;
-
-                    $.ajax({
-                        url: form.attr('action'),
-                        method: 'POST',
-                        data: serialize(),
-                        success: function (result) {
-                            if (result?.Success || result?.success) {
-                                // ResponseMessage only; reload table to get authoritative data/IDs
-                                refreshTable();
-                                saveButton.prop('disabled', false).text('Save');
-                                form[0].reset();
-                                $('#AccountTypeId').val('');
-                                $('#createAccountTypeModalLabel').text('Add Account Type');
-                                saveButton.text('Save');
-                                modal.hide();
-                                return;
-                            }
-
-                            if (attempts < maxAttempts) {
-                                setTimeout(submitRequest, 700);
-                                return;
-                            }
-
-                            showError(result?.Messages || result?.messages || result?.Message || result?.message || 'We could not save the record. Please try again.');
-                            saveButton.prop('disabled', false).text('Save');
-                        },
-                        error: function (xhr) {
-                            if (attempts < maxAttempts) {
-                                setTimeout(submitRequest, 700);
-                                return;
-                            }
-
-                            const message = xhr?.responseJSON?.Messages || xhr?.responseJSON?.messages || xhr?.responseJSON?.Message || xhr?.responseJSON?.message || 'We could not save the record. Please try again.';
-                            showError(message);
-                            saveButton.prop('disabled', false).text('Save');
-                        }
-                    });
-                };
-
-                submitRequest();
-            });
-
-            modalElement.addEventListener('hidden.bs.modal', () => {
+            const resetForm = () => {
                 form[0].reset();
-                resetError();
-                saveButton.prop('disabled', false).text('Save');
-                $('#AccountTypeId').val('');
-                $('#createAccountTypeModalLabel').text('Add Account Type');
-                editingRow = null;
+                $('#itemId').val('');
+                errorBox.addClass('d-none').text('');
+                saveBtn.prop('disabled', false).text('Save');
+            };
+
+            $('#formModal').on('show.bs.modal', function (e) {
+                const btn = $(e.relatedTarget);
+                const mode = btn.data('mode');
+                resetForm();
+                if (mode === 'edit') {
+                    $('.modal-title').text('Edit Account Type');
+                    $('#itemId').val(btn.data('id'));
+                    $('#AccountTypeName').val(btn.data('name'));
+                    $('#Description').val(btn.data('description') || '');
+                    saveBtn.text('Update');
+                } else {
+                    $('.modal-title').text('Add Account Type');
+                }
             });
+
+            saveBtn.on('click', () => form.trigger('submit'));
+
+            form.on('submit', function (e) {
+                e.preventDefault();
+                errorBox.addClass('d-none');
+                saveBtn.prop('disabled', true).text('Saving...');
+
+                $.ajax({
+                    url: '@Url.Action("CreateUpdate", "AccountType")',
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function (res) {
+                        if (res.success) {
+                            location.reload();
+                        } else {
+                            errorBox.removeClass('d-none').text(res.messages || 'Error saving record.');
+                            saveBtn.prop('disabled', false).text('Save');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        errorBox.removeClass('d-none').text('Server error: ' + (xhr.responseText || error));
+                        saveBtn.prop('disabled', false).text('Save');
+                    }
+                });
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', resetForm);
         });
     </script>
 }

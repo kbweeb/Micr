@@ -152,6 +152,7 @@ public partial class MicrDbContext : DbContext
                 .IsFixedLength();
             entity.Property(e => e.CurrencyName).HasMaxLength(50);
             entity.Property(e => e.Symbol).HasMaxLength(10);
+            entity.Property(e => e.Description).HasMaxLength(400);
 
             entity.HasOne(d => d.CreatedByUser).WithMany(p => p.Currencies)
                 .HasForeignKey(d => d.CreatedByUserId)
@@ -190,6 +191,7 @@ public partial class MicrDbContext : DbContext
             entity.Property(e => e.NumberOfLeaflet1)
                 .HasMaxLength(100)
                 .HasColumnName("NumberOfLeaflet");
+            entity.Property(e => e.Description).HasMaxLength(400);
 
             entity.HasOne(d => d.CreatedByUser).WithMany(p => p.NumberOfLeaflets)
                 .HasForeignKey(d => d.CreatedByUserId)

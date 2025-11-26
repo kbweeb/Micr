@@ -1,49 +1,280 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\amoon\\Desktop\\WORK\\APEX BANK\\MicrApplication\\Micr\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\controllers\\accounttypecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\controllers\\accounttypecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\controllers\\regioncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\controllers\\regioncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7D9417A-796C-4153-B728-35F775A35937}|BusinessLogic\\BusinessLogic.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\businesslogic\\logic\\accounttypeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F7D9417A-796C-4153-B728-35F775A35937}|BusinessLogic\\BusinessLogic.csproj|solutionrelative:businesslogic\\logic\\accounttypeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7D9417A-796C-4153-B728-35F775A35937}|BusinessLogic\\BusinessLogic.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\businesslogic\\logic\\regionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F7D9417A-796C-4153-B728-35F775A35937}|BusinessLogic\\BusinessLogic.csproj|solutionrelative:businesslogic\\logic\\regionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\views\\region\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\views\\region\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\views\\region\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\views\\region\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18B13F25-6F53-4804-B32E-3C1E1E1056BB}|DataAccessLogic\\DataAccessLogic.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\dataaccesslogic\\appdataaccess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18B13F25-6F53-4804-B32E-3C1E1E1056BB}|DataAccessLogic\\DataAccessLogic.csproj|solutionrelative:dataaccesslogic\\appdataaccess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\models\\accounttype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\models\\accounttype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\models\\accounttypecustom.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\models\\accounttypecustom.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\dtos\\accounttypedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\dtos\\accounttypedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\dtos\\bankbranchupsertrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\dtos\\bankbranchupsertrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\micrui\\dtos\\accounttypeupsertrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1ADAD9E-89EF-4AE3-B0C8-9B0944F2A18B}|MicrUI\\MicrUI.csproj|solutionrelative:micrui\\dtos\\accounttypeupsertrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75E60A68-218E-4969-BB93-F9A963616255}|Domain\\Domain.csproj|c:\\users\\ednaa\\desktop\\new folder\\micr\\domain\\dtos\\accounttypedtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75E60A68-218E-4969-BB93-F9A963616255}|Domain\\Domain.csproj|solutionrelative:domain\\dtos\\accounttypedtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
-      "Orientation": 0,
+      "Orientation": 1,
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "DockedHeight": 904,
+          "SelectedChildIndex": 6,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
             },
             {
               "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Bookmark",
               "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RegionController.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Controllers\\RegionController.cs",
+              "RelativeDocumentMoniker": "MicrUI\\Controllers\\RegionController.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Controllers\\RegionController.cs",
+              "RelativeToolTip": "MicrUI\\Controllers\\RegionController.cs",
+              "ViewState": "AgIAACoAAAAAAAAAAAAAABoAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T14:59:19.253Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Views\\Region\\Create.cshtml",
+              "RelativeDocumentMoniker": "MicrUI\\Views\\Region\\Create.cshtml",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Views\\Region\\Create.cshtml",
+              "RelativeToolTip": "MicrUI\\Views\\Region\\Create.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-03T15:00:25.963Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AccountTypeService.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\Logic\\AccountTypeService.cs",
+              "RelativeDocumentMoniker": "BusinessLogic\\Logic\\AccountTypeService.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\Logic\\AccountTypeService.cs",
+              "RelativeToolTip": "BusinessLogic\\Logic\\AccountTypeService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T09:03:43.949Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AccountTypeController.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Controllers\\AccountTypeController.cs",
+              "RelativeDocumentMoniker": "MicrUI\\Controllers\\AccountTypeController.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Controllers\\AccountTypeController.cs",
+              "RelativeToolTip": "MicrUI\\Controllers\\AccountTypeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T10:45:25.246Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "README.md",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\README.md",
+              "RelativeDocumentMoniker": "MicrUI\\README.md",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\README.md",
+              "RelativeToolTip": "MicrUI\\README.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-11-04T11:15:52.951Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Views\\Region\\Index.cshtml",
+              "RelativeDocumentMoniker": "MicrUI\\Views\\Region\\Index.cshtml",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Views\\Region\\Index.cshtml",
+              "RelativeToolTip": "MicrUI\\Views\\Region\\Index.cshtml",
+              "ViewState": "AgIAADEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-03T15:03:58.061Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "RegionService.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\Logic\\RegionService.cs",
+              "RelativeDocumentMoniker": "BusinessLogic\\Logic\\RegionService.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\BusinessLogic\\Logic\\RegionService.cs",
+              "RelativeToolTip": "BusinessLogic\\Logic\\RegionService.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAIAwwB8AAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T15:08:51.618Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Program.cs",
+              "RelativeDocumentMoniker": "MicrUI\\Program.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Program.cs",
+              "RelativeToolTip": "MicrUI\\Program.cs",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAgwJMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T11:21:38.452Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AccountTypeCustom.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Models\\AccountTypeCustom.cs",
+              "RelativeDocumentMoniker": "MicrUI\\Models\\AccountTypeCustom.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Models\\AccountTypeCustom.cs",
+              "RelativeToolTip": "MicrUI\\Models\\AccountTypeCustom.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T11:03:34.108Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "AccountTypeDto.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Dtos\\AccountTypeDto.cs",
+              "RelativeDocumentMoniker": "MicrUI\\Dtos\\AccountTypeDto.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Dtos\\AccountTypeDto.cs",
+              "RelativeToolTip": "MicrUI\\Dtos\\AccountTypeDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T11:03:24.007Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AccountType.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Models\\AccountType.cs",
+              "RelativeDocumentMoniker": "MicrUI\\Models\\AccountType.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Models\\AccountType.cs",
+              "RelativeToolTip": "MicrUI\\Models\\AccountType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T11:03:35.986Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "BankBranchUpsertRequest.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Dtos\\BankBranchUpsertRequest.cs",
+              "RelativeDocumentMoniker": "MicrUI\\Dtos\\BankBranchUpsertRequest.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Dtos\\BankBranchUpsertRequest.cs",
+              "RelativeToolTip": "MicrUI\\Dtos\\BankBranchUpsertRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T11:03:19.357Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "AppDataAccess.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccessLogic\\AppDataAccess.cs",
+              "RelativeDocumentMoniker": "DataAccessLogic\\AppDataAccess.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\DataAccessLogic\\AppDataAccess.cs",
+              "RelativeToolTip": "DataAccessLogic\\AppDataAccess.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T09:50:23.17Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "AccountTypeUpsertRequest.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Dtos\\AccountTypeUpsertRequest.cs",
+              "RelativeDocumentMoniker": "MicrUI\\Dtos\\AccountTypeUpsertRequest.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\MicrUI\\Dtos\\AccountTypeUpsertRequest.cs",
+              "RelativeToolTip": "MicrUI\\Dtos\\AccountTypeUpsertRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T11:03:08.752Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "AccountTypeDtos.cs",
+              "DocumentMoniker": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\DTOs\\AccountTypeDtos.cs",
+              "RelativeDocumentMoniker": "Domain\\DTOs\\AccountTypeDtos.cs",
+              "ToolTip": "C:\\Users\\ednaa\\Desktop\\New folder\\Micr\\Domain\\DTOs\\AccountTypeDtos.cs",
+              "RelativeToolTip": "Domain\\DTOs\\AccountTypeDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T09:36:33.578Z"
             }
           ]
         },
         {
-          "DockedWidth": 960,
+          "DockedHeight": 298,
           "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:2:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:3:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
             }
           ]
         }

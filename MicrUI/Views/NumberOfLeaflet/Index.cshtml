@@ -1,41 +1,74 @@
-@model IEnumerable<MicrDbChequeProcessingSystem.Models.NumberOfLeaflet>
+@model Domain.ViewModels.NumberOfLeaflets.NumberOfLeafletIndexViewModel
 
 @{
-    var leaflets = Model?.ToList() ?? new List<MicrDbChequeProcessingSystem.Models.NumberOfLeaflet>();
-    ViewData["Title"] = "Leaflet Counts";
+    ViewData["Title"] = "Number of Leaflets";
+    var items = Model?.Items ?? new List<Domain.ViewModels.NumberOfLeaflets.NumberOfLeafletListItemViewModel>();
 }
 
 <div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
-            <h5 class="mb-0">Leaflet Count Definitions</h5>
-            <small class="text-muted">@leaflets.Count options configured.</small>
+            <h5 class="mb-0">Number of Leaflets</h5>
+            <small class="text-muted" data-role="count">@items.Count options available.</small>
         </div>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#formModal" data-mode="add">
+            <i class="bi bi-plus-circle me-1"></i> Add New
+        </button>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="numberOfLeafletTable">
+            <table class="table table-hover align-middle" id="dataTable">
                 <thead class="table-light">
                     <tr>
-                        <th scope="col">Leaflets</th>
-                        <th scope="col">Created</th>
-                        <th scope="col">Created By</th>
+                        <th>Number of Leaflets</th>
+                        <th>Created</th>
+                        <th>Created By</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (leaflets.Any())
+                    @foreach (var item in items)
                     {
-                        foreach (var leaflet in leaflets)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@leaflet.NumberOfLeaflet1</td>
-                                <td>@leaflet.CreatedDate.ToString("dd MMM yyyy")</td>
-                                <td>@leaflet.CreatedByUser?.Fullname</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td class="fw-semibold">@item.NumberOfLeaflet</td>
+                            <td>@item.Created</td>
+                            <td>@item.CreatedBy</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#formModal"
+                                        data-mode="edit" data-id="@item.NumberOfLeafletId" data-leaflet="@item.NumberOfLeaflet">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="formModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Number of Leaflets</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dataForm" asp-action="CreateUpdate" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="alert alert-danger d-none" data-role="error"></div>
+                    <input type="hidden" id="itemId" name="numberOfLeafletId" />
+                    <div class="mb-3">
+                        <label for="NumberOfLeaflet" class="form-label">Number of Leaflets <span class="text-danger">*</span></label>
+                        <input class="form-control" type="number" id="NumberOfLeaflet" name="NumberOfLeaflet" min="1" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" data-role="save">Save</button>
+            </div>
         </div>
     </div>
 </div>
@@ -45,9 +78,60 @@
     <script src="~/duralux/vendors/js/dataTables.bs5.min.js" asp-append-version="true"></script>
     <script>
         $(function () {
-            $('#numberOfLeafletTable').DataTable({
-                responsive: true
+            const table = $('#dataTable').DataTable({ responsive: true });
+            const modalEl = document.getElementById('formModal');
+            const form = $('#dataForm');
+            const saveBtn = $('[data-role="save"]');
+            const errorBox = form.find('[data-role="error"]');
+
+            const resetForm = () => {
+                form[0].reset();
+                $('#itemId').val('');
+                errorBox.addClass('d-none').text('');
+                saveBtn.prop('disabled', false).text('Save');
+            };
+
+            $('#formModal').on('show.bs.modal', function (e) {
+                const btn = $(e.relatedTarget);
+                const mode = btn.data('mode');
+                resetForm();
+                if (mode === 'edit') {
+                    $('.modal-title').text('Edit Number of Leaflets');
+                    $('#itemId').val(btn.data('id'));
+                    $('#NumberOfLeaflet').val(btn.data('leaflet'));
+                    saveBtn.text('Update');
+                } else {
+                    $('.modal-title').text('Add Number of Leaflets');
+                }
             });
+
+            saveBtn.on('click', () => form.trigger('submit'));
+
+            form.on('submit', function (e) {
+                e.preventDefault();
+                errorBox.addClass('d-none');
+                saveBtn.prop('disabled', true).text('Saving...');
+
+                $.ajax({
+                    url: '@Url.Action("CreateUpdate", "NumberOfLeaflet")',
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function (res) {
+                        if (res.success) {
+                            location.reload();
+                        } else {
+                            errorBox.removeClass('d-none').text(res.messages || 'Error saving record.');
+                            saveBtn.prop('disabled', false).text('Save');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        errorBox.removeClass('d-none').text('Server error: ' + (xhr.responseText || error));
+                        saveBtn.prop('disabled', false).text('Save');
+                    }
+                });
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', resetForm);
         });
     </script>
 }
