@@ -76,7 +76,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="AccountTypeId" class="form-label">Account Type <span class="text-danger">*</span></label>
-                        <select class="form-select" id="AccountTypeId" name="AccountTypeId" required>
+                        <select class="form-select searchable-dropdown" id="AccountTypeId" name="AccountTypeId" required>
                             <option value="">Select Account Type</option>
                             @foreach (var a in accountTypes)
                             {
@@ -86,7 +86,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="NumberOfLeafletId" class="form-label">Number of Leaflets <span class="text-danger">*</span></label>
-                        <select class="form-select" id="NumberOfLeafletId" name="NumberOfLeafletId" required>
+                        <select class="form-select searchable-dropdown" id="NumberOfLeafletId" name="NumberOfLeafletId" required>
                             <option value="">Select Leaflets</option>
                             @foreach (var l in leaflets)
                             {
@@ -96,7 +96,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="TransactionCodeId" class="form-label">Transaction Code <span class="text-danger">*</span></label>
-                        <select class="form-select" id="TransactionCodeId" name="TransactionCodeId" required>
+                        <select class="form-select searchable-dropdown" id="TransactionCodeId" name="TransactionCodeId" required>
                             <option value="">Select Transaction Code</option>
                             @foreach (var t in transactionCodes)
                             {
@@ -132,6 +132,17 @@
                 saveBtn.prop('disabled', false).text('Save');
             };
 
+            // Initialize Select2 for searchable dropdowns
+            $('#formModal').on('shown.bs.modal', function () {
+                $('.searchable-dropdown').select2({
+                    theme: 'bootstrap-5',
+                    dropdownParent: $('#formModal'),
+                    placeholder: 'Search...',
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+
             $('#formModal').on('show.bs.modal', function (e) {
                 const btn = $(e.relatedTarget);
                 const mode = btn.data('mode');
@@ -141,9 +152,9 @@
                     $('#itemId').val(btn.data('id'));
                     $('#BookTypeCode').val(btn.data('code'));
                     $('#BookTypeName').val(btn.data('name'));
-                    $('#AccountTypeId').val(btn.data('accounttypeid'));
-                    $('#NumberOfLeafletId').val(btn.data('leafletid'));
-                    $('#TransactionCodeId').val(btn.data('transactioncodeid'));
+                    $('#AccountTypeId').val(btn.data('accounttypeid')).trigger('change');
+                    $('#NumberOfLeafletId').val(btn.data('leafletid')).trigger('change');
+                    $('#TransactionCodeId').val(btn.data('transactioncodeid')).trigger('change');
                     saveBtn.text('Update');
                 } else {
                     $('.modal-title').text('Add Book Type');

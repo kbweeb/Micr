@@ -83,7 +83,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="RegionId" class="form-label">Region <span class="text-danger">*</span></label>
-                        <select class="form-select" id="RegionId" name="RegionId" required>
+                        <select class="form-select searchable-dropdown" id="RegionId" name="RegionId" required>
                             <option value="">Select Region</option>
                             @foreach (var r in regions)
                             {
@@ -124,6 +124,17 @@
                 saveBtn.prop('disabled', false).text('Save');
             };
 
+            // Initialize Select2 for searchable dropdowns
+            $('#formModal').on('shown.bs.modal', function () {
+                $('.searchable-dropdown').select2({
+                    theme: 'bootstrap-5',
+                    dropdownParent: $('#formModal'),
+                    placeholder: 'Search...',
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+
             $('#formModal').on('show.bs.modal', function (e) {
                 const btn = $(e.relatedTarget);
                 const mode = btn.data('mode');
@@ -133,7 +144,7 @@
                     $('#itemId').val(btn.data('id'));
                     $('#BankName').val(btn.data('name'));
                     $('#SortCode').val(btn.data('sortcode'));
-                    $('#RegionId').val(btn.data('regionid'));
+                    $('#RegionId').val(btn.data('regionid')).trigger('change');
                     $('#IsEnabled').prop('checked', btn.data('enabled') === true || btn.data('enabled') === 'true');
                     saveBtn.text('Update');
                 } else {

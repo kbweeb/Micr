@@ -77,7 +77,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="BankId" class="form-label">Parent Bank <span class="text-danger">*</span></label>
-                        <select class="form-select" id="BankId" name="BankId" required>
+                        <select class="form-select searchable-dropdown" id="BankId" name="BankId" required>
                             <option value="">Select Bank</option>
                             @foreach (var b in banks)
                             {
@@ -118,6 +118,17 @@
                 saveBtn.prop('disabled', false).text('Save');
             };
 
+            // Initialize Select2 for searchable dropdowns
+            $('#formModal').on('shown.bs.modal', function () {
+                $('.searchable-dropdown').select2({
+                    theme: 'bootstrap-5',
+                    dropdownParent: $('#formModal'),
+                    placeholder: 'Search...',
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+
             $('#formModal').on('show.bs.modal', function (e) {
                 const btn = $(e.relatedTarget);
                 const mode = btn.data('mode');
@@ -126,7 +137,7 @@
                     $('.modal-title').text('Edit Bank Branch');
                     $('#itemId').val(btn.data('id'));
                     $('#BankBranchName').val(btn.data('name'));
-                    $('#BankId').val(btn.data('bankid'));
+                    $('#BankId').val(btn.data('bankid')).trigger('change');
                     $('#IsEnabled').prop('checked', btn.data('enabled') === true || btn.data('enabled') === 'true');
                     saveBtn.text('Update');
                 } else {
