@@ -6,18 +6,18 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class CurrencyController : Controller
 {
-    private readonly ICurrencyService _service;
+    private readonly IMicrPortalService _portal;
     private readonly ILogger<CurrencyController> _logger;
 
-    public CurrencyController(ICurrencyService service, ILogger<CurrencyController> logger)
+    public CurrencyController(IMicrPortalService portal, ILogger<CurrencyController> logger)
     {
-        _service = service;
+        _portal = portal;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetIndexAsync();
+        var list = await _portal.GetCurrenciesAsync();
         var items = list.Select(c => new CurrencyListItemViewModel
         {
             CurrencyId = c.CurrencyId,
@@ -34,7 +34,7 @@ public class CurrencyController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? currencyId, CurrencyFormViewModel request)
+    public async Task<JsonResult> CreateUpdate(CurrencyFormViewModel request)
     {
         try
         {
@@ -43,14 +43,14 @@ public class CurrencyController : Controller
                 return Json(new { success = false, messages = "Please provide the required details." });
             }
 
-            if (currencyId.HasValue && currencyId.Value > 0)
+            if (request.CurrencyId.HasValue && request.CurrencyId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(currencyId.Value, request);
-                _logger.LogInformation("Currency updated: {Id}", currencyId.Value);
+                var updated = await _portal.UpdateCurrencyAsync(request.CurrencyId.Value, request);
+                _logger.LogInformation("Currency updated: {Id}", request.CurrencyId.Value);
                 return Json(new { success = true, messages = "Currency updated successfully!", data = updated });
             }
 
-            var created = await _service.CreateAsync(request);
+            var created = await _portal.CreateCurrencyAsync(request);
             _logger.LogInformation("Currency created: {Id}", created.CurrencyId);
             return Json(new { success = true, messages = "New currency added successfully!", data = created });
         }

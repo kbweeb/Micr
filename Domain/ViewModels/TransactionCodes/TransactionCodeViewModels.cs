@@ -15,6 +15,7 @@ public class TransactionCodeListItemViewModel
 
 public class TransactionCodeFormViewModel
 {
+    public long? TransactionCodeId { get; set; }
     public string Code { get; set; } = string.Empty;
     public long? CreatedByUserId { get; set; }
 }

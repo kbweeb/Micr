@@ -6,18 +6,18 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class TransactionCodeController : Controller
 {
-    private readonly ITransactionCodeService _service;
+    private readonly IMicrPortalService _portal;
     private readonly ILogger<TransactionCodeController> _logger;
 
-    public TransactionCodeController(ITransactionCodeService service, ILogger<TransactionCodeController> logger)
+    public TransactionCodeController(IMicrPortalService portal, ILogger<TransactionCodeController> logger)
     {
-        _service = service;
+        _portal = portal;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetIndexAsync();
+        var list = await _portal.GetTransactionCodesAsync();
         var items = list.Select(t => new TransactionCodeListItemViewModel
         {
             TransactionCodeId = t.TransactionCodeId,
@@ -31,7 +31,7 @@ public class TransactionCodeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? transactionCodeId, TransactionCodeFormViewModel request)
+    public async Task<JsonResult> CreateUpdate(TransactionCodeFormViewModel request)
     {
         try
         {
@@ -40,14 +40,14 @@ public class TransactionCodeController : Controller
                 return Json(new { success = false, messages = "Please provide the required details." });
             }
 
-            if (transactionCodeId.HasValue && transactionCodeId.Value > 0)
+            if (request.TransactionCodeId.HasValue && request.TransactionCodeId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(transactionCodeId.Value, request);
-                _logger.LogInformation("TransactionCode updated: {Id}", transactionCodeId.Value);
+                var updated = await _portal.UpdateTransactionCodeAsync(request.TransactionCodeId.Value, request);
+                _logger.LogInformation("TransactionCode updated: {Id}", request.TransactionCodeId.Value);
                 return Json(new { success = true, messages = "Transaction code updated successfully!", data = updated });
             }
 
-            var created = await _service.CreateAsync(request);
+            var created = await _portal.CreateTransactionCodeAsync(request);
             _logger.LogInformation("TransactionCode created: {Id}", created.TransactionCodeId);
             return Json(new { success = true, messages = "New transaction code added successfully!", data = created });
         }

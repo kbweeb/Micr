@@ -21,6 +21,7 @@ public class BookTypeListItemViewModel
 
 public class BookTypeFormViewModel
 {
+    public long? BookTypeId { get; set; }
     public string BookTypeCode { get; set; } = string.Empty;
     public string BookTypeName { get; set; } = string.Empty;
     public long AccountTypeId { get; set; }

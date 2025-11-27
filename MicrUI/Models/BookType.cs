@@ -17,13 +17,13 @@ public partial class BookType
 
     public long NumberOfLeafletId { get; set; }
 
-    public long CreatedByUserId { get; set; }
+    public long? CreatedByUserId { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
     public virtual AccountType AccountType { get; set; } = null!;
 
-    public virtual UserProfile CreatedByUser { get; set; } = null!;
+    public virtual UserProfile? CreatedByUser { get; set; }
 
     public virtual NumberOfLeaflet NumberOfLeaflet { get; set; } = null!;
 

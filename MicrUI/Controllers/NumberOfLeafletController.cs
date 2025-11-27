@@ -6,18 +6,18 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class NumberOfLeafletController : Controller
 {
-    private readonly INumberOfLeafletService _service;
+    private readonly IMicrPortalService _portal;
     private readonly ILogger<NumberOfLeafletController> _logger;
 
-    public NumberOfLeafletController(INumberOfLeafletService service, ILogger<NumberOfLeafletController> logger)
+    public NumberOfLeafletController(IMicrPortalService portal, ILogger<NumberOfLeafletController> logger)
     {
-        _service = service;
+        _portal = portal;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetIndexAsync();
+        var list = await _portal.GetNumberOfLeafletsAsync();
         var items = list.Select(n => new NumberOfLeafletListItemViewModel
         {
             NumberOfLeafletId = n.NumberOfLeafletId,
@@ -31,7 +31,7 @@ public class NumberOfLeafletController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? numberOfLeafletId, NumberOfLeafletFormViewModel request)
+    public async Task<JsonResult> CreateUpdate(NumberOfLeafletFormViewModel request)
     {
         try
         {
@@ -40,14 +40,14 @@ public class NumberOfLeafletController : Controller
                 return Json(new { success = false, messages = "Please provide the required details." });
             }
 
-            if (numberOfLeafletId.HasValue && numberOfLeafletId.Value > 0)
+            if (request.NumberOfLeafletId.HasValue && request.NumberOfLeafletId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(numberOfLeafletId.Value, request);
-                _logger.LogInformation("NumberOfLeaflet updated: {Id}", numberOfLeafletId.Value);
+                var updated = await _portal.UpdateNumberOfLeafletAsync(request.NumberOfLeafletId.Value, request);
+                _logger.LogInformation("NumberOfLeaflet updated: {Id}", request.NumberOfLeafletId.Value);
                 return Json(new { success = true, messages = "Number of leaflet updated successfully!", data = updated });
             }
 
-            var created = await _service.CreateAsync(request);
+            var created = await _portal.CreateNumberOfLeafletAsync(request);
             _logger.LogInformation("NumberOfLeaflet created: {Id}", created.NumberOfLeafletId);
             return Json(new { success = true, messages = "New number of leaflet added successfully!", data = created });
         }

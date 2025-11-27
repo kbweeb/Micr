@@ -18,6 +18,7 @@ public class CurrencyListItemViewModel
 
 public class CurrencyFormViewModel
 {
+    public long? CurrencyId { get; set; }
     public string CurrencyName { get; set; } = string.Empty;
     public string? CurrencyCode { get; set; }
     public string? Symbol { get; set; }

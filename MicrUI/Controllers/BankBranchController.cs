@@ -6,21 +6,19 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class BankBranchController : Controller
 {
-    private readonly IBankBranchService _service;
-    private readonly IBankService _bankService;
+    private readonly IMicrPortalService _portal;
     private readonly ILogger<BankBranchController> _logger;
 
-    public BankBranchController(IBankBranchService service, IBankService bankService, ILogger<BankBranchController> logger)
+    public BankBranchController(IMicrPortalService portal, ILogger<BankBranchController> logger)
     {
-        _service = service;
-        _bankService = bankService;
+        _portal = portal;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetIndexAsync();
-        var banks = await _bankService.GetIndexAsync();
+        var list = await _portal.GetBankBranchesAsync();
+        var banks = await _portal.GetBanksAsync();
         
         var items = list.Select(b => new BankBranchListItemViewModel
         {
@@ -38,7 +36,7 @@ public class BankBranchController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? bankBranchId, BankBranchFormViewModel request)
+    public async Task<JsonResult> CreateUpdate(BankBranchFormViewModel request)
     {
         try
         {
@@ -47,14 +45,14 @@ public class BankBranchController : Controller
                 return Json(new { success = false, messages = "Please provide the required details." });
             }
 
-            if (bankBranchId.HasValue && bankBranchId.Value > 0)
+            if (request.BankBranchId.HasValue && request.BankBranchId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(bankBranchId.Value, request);
-                _logger.LogInformation("BankBranch updated: {Id}", bankBranchId.Value);
+                var updated = await _portal.UpdateBankBranchAsync(request.BankBranchId.Value, request);
+                _logger.LogInformation("BankBranch updated: {Id}", request.BankBranchId.Value);
                 return Json(new { success = true, messages = "Bank branch updated successfully!", data = updated });
             }
 
-            var created = await _service.CreateAsync(request);
+            var created = await _portal.CreateBankBranchAsync(request);
             _logger.LogInformation("BankBranch created: {Id}", created.BankBranchId);
             return Json(new { success = true, messages = "New bank branch added successfully!", data = created });
         }

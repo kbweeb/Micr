@@ -9,11 +9,11 @@ public partial class ApprovalStatus
 
     public string ApprovalStatusName { get; set; } = null!;
 
-    public long CreatedByUserId { get; set; }
+    public long? CreatedByUserId { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
-    public virtual UserProfile CreatedByUser { get; set; } = null!;
+    public virtual UserProfile? CreatedByUser { get; set; }
 
     public virtual ICollection<UserProfile> UserProfiles { get; set; } = new List<UserProfile>();
 }

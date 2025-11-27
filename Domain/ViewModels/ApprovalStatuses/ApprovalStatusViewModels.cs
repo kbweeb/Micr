@@ -15,6 +15,7 @@ public class ApprovalStatusListItemViewModel
 
 public class ApprovalStatusFormViewModel
 {
+    public long? ApprovalStatusId { get; set; }
     public string ApprovalStatusName { get; set; } = string.Empty;
     public long? CreatedByUserId { get; set; }
 }

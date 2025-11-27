@@ -6,18 +6,18 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class StatusController : Controller
 {
-    private readonly IStatusService _service;
+    private readonly IMicrPortalService _portal;
     private readonly ILogger<StatusController> _logger;
 
-    public StatusController(IStatusService service, ILogger<StatusController> logger)
+    public StatusController(IMicrPortalService portal, ILogger<StatusController> logger)
     {
-        _service = service;
+        _portal = portal;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetIndexAsync();
+        var list = await _portal.GetStatusesAsync();
         var items = list.Select(s => new StatusListItemViewModel
         {
             StatusId = s.StatusId,
@@ -31,7 +31,7 @@ public class StatusController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? statusId, StatusFormViewModel request)
+    public async Task<JsonResult> CreateUpdate(StatusFormViewModel request)
     {
         try
         {
@@ -40,14 +40,14 @@ public class StatusController : Controller
                 return Json(new { success = false, messages = "Please provide the required details." });
             }
 
-            if (statusId.HasValue && statusId.Value > 0)
+            if (request.StatusId.HasValue && request.StatusId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(statusId.Value, request);
-                _logger.LogInformation("Status updated: {Id}", statusId.Value);
+                var updated = await _portal.UpdateStatusAsync(request.StatusId.Value, request);
+                _logger.LogInformation("Status updated: {Id}", request.StatusId.Value);
                 return Json(new { success = true, messages = "Status updated successfully!", data = updated });
             }
 
-            var created = await _service.CreateAsync(request);
+            var created = await _portal.CreateStatusAsync(request);
             _logger.LogInformation("Status created: {Id}", created.StatusId);
             return Json(new { success = true, messages = "New status added successfully!", data = created });
         }

@@ -16,6 +16,7 @@ public class AccountTypeListItemViewModel
 
 public class AccountTypeFormViewModel
 {
+    public long? AccountTypeId { get; set; }
     public string AccountTypeName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public long? CreatedByUserId { get; set; }

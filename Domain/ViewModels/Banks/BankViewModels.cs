@@ -18,6 +18,7 @@ public class BankListItemViewModel
 
 public class BankFormViewModel
 {
+    public long? BankId { get; set; }
     public string BankName { get; set; } = string.Empty;
     public string SortCode { get; set; } = string.Empty;
     public long RegionId { get; set; }

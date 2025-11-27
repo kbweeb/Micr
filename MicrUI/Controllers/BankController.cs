@@ -6,21 +6,19 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class BankController : Controller
 {
-    private readonly IBankService _service;
-    private readonly IRegionService _regionService;
+    private readonly IMicrPortalService _portal;
     private readonly ILogger<BankController> _logger;
 
-    public BankController(IBankService service, IRegionService regionService, ILogger<BankController> logger)
+    public BankController(IMicrPortalService portal, ILogger<BankController> logger)
     {
-        _service = service;
-        _regionService = regionService;
+        _portal = portal;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetIndexAsync();
-        var regions = await _regionService.GetIndexAsync();
+        var list = await _portal.GetBanksAsync();
+        var regions = await _portal.GetRegionsAsync();
         
         var items = list.Select(b => new BankListItemViewModel
         {
@@ -39,7 +37,7 @@ public class BankController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? bankId, BankFormViewModel request)
+    public async Task<JsonResult> CreateUpdate(BankFormViewModel request)
     {
         try
         {
@@ -48,14 +46,14 @@ public class BankController : Controller
                 return Json(new { success = false, messages = "Please provide the required details." });
             }
 
-            if (bankId.HasValue && bankId.Value > 0)
+            if (request.BankId.HasValue && request.BankId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(bankId.Value, request);
-                _logger.LogInformation("Bank updated: {Id}", bankId.Value);
+                var updated = await _portal.UpdateBankAsync(request.BankId.Value, request);
+                _logger.LogInformation("Bank updated: {Id}", request.BankId.Value);
                 return Json(new { success = true, messages = "Bank updated successfully!", data = updated });
             }
 
-            var created = await _service.CreateAsync(request);
+            var created = await _portal.CreateBankAsync(request);
             _logger.LogInformation("Bank created: {Id}", created.BankId);
             return Json(new { success = true, messages = "New bank added successfully!", data = created });
         }

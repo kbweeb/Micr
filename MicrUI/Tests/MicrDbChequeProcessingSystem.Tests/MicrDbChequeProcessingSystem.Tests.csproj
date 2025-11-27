@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MicrDbChequeProcessingSystem.git.csproj" />
+    <ProjectReference Include="..\..\MicrUI.csproj" />
   </ItemGroup>
 
 </Project>

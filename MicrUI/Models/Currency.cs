@@ -17,9 +17,9 @@ public partial class Currency
 
     public bool IsActive { get; set; }
 
-    public long CreatedByUserId { get; set; }
+    public long? CreatedByUserId { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
-    public virtual UserProfile CreatedByUser { get; set; } = null!;
+    public virtual UserProfile? CreatedByUser { get; set; }
 }

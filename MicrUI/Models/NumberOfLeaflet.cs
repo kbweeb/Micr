@@ -11,11 +11,11 @@ public partial class NumberOfLeaflet
 
     public string? Description { get; set; }
 
-    public long CreatedByUserId { get; set; }
+    public long? CreatedByUserId { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
     public virtual ICollection<BookType> BookTypes { get; set; } = new List<BookType>();
 
-    public virtual UserProfile CreatedByUser { get; set; } = null!;
+    public virtual UserProfile? CreatedByUser { get; set; }
 }

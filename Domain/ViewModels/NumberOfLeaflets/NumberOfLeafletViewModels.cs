@@ -15,6 +15,7 @@ public class NumberOfLeafletListItemViewModel
 
 public class NumberOfLeafletFormViewModel
 {
+    public long? NumberOfLeafletId { get; set; }
     public string NumberOfLeaflet { get; set; } = string.Empty;
     public long? CreatedByUserId { get; set; }
 }

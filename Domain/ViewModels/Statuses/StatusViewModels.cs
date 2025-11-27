@@ -15,6 +15,7 @@ public class StatusListItemViewModel
 
 public class StatusFormViewModel
 {
+    public long? StatusId { get; set; }
     public string StatusName { get; set; } = string.Empty;
     public long? CreatedByUserId { get; set; }
 }

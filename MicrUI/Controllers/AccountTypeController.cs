@@ -6,18 +6,18 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class AccountTypeController : Controller
 {
-    private readonly IAccountTypeService _service;
+    private readonly IMicrPortalService _portal;
     private readonly ILogger<AccountTypeController> _logger;
 
-    public AccountTypeController(IAccountTypeService service, ILogger<AccountTypeController> logger)
+    public AccountTypeController(IMicrPortalService portal, ILogger<AccountTypeController> logger)
     {
-        _service = service;
+        _portal = portal;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetIndexAsync();
+        var list = await _portal.GetAccountTypesAsync();
         var items = list.Select(a => new AccountTypeListItemViewModel
         {
             AccountTypeId = a.AccountTypeId,
@@ -32,7 +32,7 @@ public class AccountTypeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? accountTypeId, AccountTypeFormViewModel request)
+    public async Task<JsonResult> CreateUpdate(AccountTypeFormViewModel request)
     {
         try
         {
@@ -41,14 +41,14 @@ public class AccountTypeController : Controller
                 return Json(new { success = false, messages = "Please provide the required details." });
             }
 
-            if (accountTypeId.HasValue && accountTypeId.Value > 0)
+            if (request.AccountTypeId.HasValue && request.AccountTypeId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(accountTypeId.Value, request);
-                _logger.LogInformation("AccountType updated: {Id}", accountTypeId.Value);
+                var updated = await _portal.UpdateAccountTypeAsync(request.AccountTypeId.Value, request);
+                _logger.LogInformation("AccountType updated: {Id}", request.AccountTypeId.Value);
                 return Json(new { success = true, messages = "Account type updated successfully!", data = updated });
             }
 
-            var created = await _service.CreateAsync(request);
+            var created = await _portal.CreateAccountTypeAsync(request);
             _logger.LogInformation("AccountType created: {Id}", created.AccountTypeId);
             return Json(new { success = true, messages = "New account type added successfully!", data = created });
         }

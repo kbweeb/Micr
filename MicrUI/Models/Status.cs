@@ -9,9 +9,9 @@ public partial class Status
 
     public string StatusName { get; set; } = null!;
 
-    public long CreatedByUserId { get; set; }
+    public long? CreatedByUserId { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
-    public virtual UserProfile CreatedByUser { get; set; } = null!;
+    public virtual UserProfile? CreatedByUser { get; set; }
 }

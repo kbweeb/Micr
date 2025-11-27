@@ -6,18 +6,18 @@ namespace MicrDbChequeProcessingSystem.Controllers;
 
 public class RegionController : Controller
 {
-    private readonly IRegionService _service;
+    private readonly IMicrPortalService _portal;
     private readonly ILogger<RegionController> _logger;
 
-    public RegionController(IRegionService service, ILogger<RegionController> logger)
+    public RegionController(IMicrPortalService portal, ILogger<RegionController> logger)
     {
-        _service = service;
+        _portal = portal;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var list = await _service.GetIndexAsync();
+        var list = await _portal.GetRegionsAsync();
         var items = list.Select(r => new RegionListItemViewModel
         {
             RegionId = r.RegionId,
@@ -33,7 +33,7 @@ public class RegionController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<JsonResult> CreateUpdate(long? regionId, RegionFormViewModel request)
+    public async Task<JsonResult> CreateUpdate(RegionFormViewModel request)
     {
         try
         {
@@ -42,14 +42,14 @@ public class RegionController : Controller
                 return Json(new { success = false, messages = "Please provide the required details." });
             }
 
-            if (regionId.HasValue && regionId.Value > 0)
+            if (request.RegionId.HasValue && request.RegionId.Value > 0)
             {
-                var updated = await _service.UpdateAsync(regionId.Value, request);
-                _logger.LogInformation("Region updated: {Id}", regionId.Value);
+                var updated = await _portal.UpdateRegionAsync(request.RegionId.Value, request);
+                _logger.LogInformation("Region updated: {Id}", request.RegionId.Value);
                 return Json(new { success = true, messages = "Region updated successfully!", data = updated });
             }
 
-            var created = await _service.CreateAsync(request);
+            var created = await _portal.CreateRegionAsync(request);
             _logger.LogInformation("Region created: {Id}", created.RegionId);
             return Json(new { success = true, messages = "New region added successfully!", data = created });
         }

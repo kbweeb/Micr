@@ -1,10 +1,102 @@
-﻿# Micr
+﻿# MICR Cheque Processing System
 
-A 4-layer .NET 8 solution:
-- Domain (POCOs only)
-- DataAccessLogic (EF Core + repositories + AutoMapper)
-- BusinessLogic (services + validation)
-- MicrUI (ASP.NET Core web app — the ONLY runnable project)
+A 4-layer .NET 8 banking application for MICR (Magnetic Ink Character Recognition) cheque processing.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        MicrUI                                │
+│              (ASP.NET Core MVC Web App)                      │
+│                                                              │
+│  Controllers: Bank, BankBranch, Region, AccountType,         │
+│  Currency, Status, TransactionCode, BookType,                │
+│  NumberOfLeaflet, ApprovalStatus                             │
+└──────────────────────┬──────────────────────────────────────┘
+                       │ IMicrPortalService
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    BusinessLogic                             │
+│                                                              │
+│  IMicrPortalService / MicrPortalService                      │
+│  - Centralized service for all CRUD operations               │
+│  - Validation for each entity                                │
+│  - User context management                                   │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  DataAccessLogic                             │
+│                                                              │
+│  - EF Core DbContext (MicrDbContext)                         │
+│  - Repository pattern                                        │
+│  - AutoMapper profiles                                       │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Domain                                  │
+│                                                              │
+│  - Entity classes (DataTables/)                              │
+│  - ViewModels for each module                                │
+│  - DTOs for data transfer                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Layer Details
+
+| Layer | Purpose |
+|-------|---------|
+| **Domain** | POCOs, ViewModels, DTOs - no dependencies |
+| **DataAccessLogic** | EF Core DbContext, repositories, AutoMapper |
+| **BusinessLogic** | Centralized `IMicrPortalService` with validation |
+| **MicrUI** | ASP.NET Core MVC web app (only runnable project) |
+
+## Centralized Portal Service
+
+All business operations are handled through a single service interface:
+
+```csharp
+public interface IMicrPortalService
+{
+    // Banks
+    Task<IEnumerable<BankDto>> GetBanksAsync();
+    Task<BankDto> CreateBankAsync(BankFormViewModel form);
+    Task<BankDto> UpdateBankAsync(long id, BankFormViewModel form);
+    
+    // BankBranches, Regions, AccountTypes, Currencies,
+    // Statuses, TransactionCodes, BookTypes, 
+    // NumberOfLeaflets, ApprovalStatuses
+    // ... similar CRUD methods for each module
+}
+```
+
+## FormViewModels with Nullable IDs
+
+All FormViewModels include a nullable ID property for unified Create/Update operations:
+
+```csharp
+public class AccountTypeFormViewModel
+{
+    public long? AccountTypeId { get; set; }  // null = Create, has value = Update
+    public string AccountTypeName { get; set; }
+    public string? Description { get; set; }
+    public long? CreatedByUserId { get; set; }
+}
+```
+
+Controllers use the ID from the request:
+
+```csharp
+[HttpPost]
+public async Task<JsonResult> CreateUpdate(AccountTypeFormViewModel request)
+{
+    if (request.AccountTypeId.HasValue && request.AccountTypeId.Value > 0)
+        return await _portal.UpdateAccountTypeAsync(request.AccountTypeId.Value, request);
+    
+    return await _portal.CreateAccountTypeAsync(request);
+}
+```
 
 This guide explains how to clone, configure, build, and run the app on any Windows machine.
 
